@@ -35,17 +35,60 @@ function briefSummary() {
     }
 }
 
-if (detailed) detailedSummary();
-else briefSummary()
+function getSalary() {
+    let salary = 0;
 
-let sum = 0;
-for (let key of Object.keys(total).sort()) {
-    if (will_be_back[key] > 0) {
-	console.log(key + ": " + total[key] + "\t( -" + will_be_back[key] + " )");
-    } else {
-	console.log(key + ": " + total[key]);
+    for(let e of data) {
+	if(e.type == "Salary") {
+	    salary += e.credit;
+	}
     }
 
-    sum += total[key] - will_be_back[key];
-    console.log("\t", sum);
+    return salary;
 }
+
+function getPrevMonthLeftOver() {
+    let prev_leftover = 0;
+
+    for (let e of data) {
+	// irrespective of "ignore", so can add custom entities to add prev_leftovers
+	if (e.prev_leftover == true) {
+	    prev_leftover += e.credit - e.debit;
+	}
+    }
+
+    return prev_leftover;
+}
+
+function main() {
+    if (detailed) detailedSummary();
+    else briefSummary()
+
+    let salary = getSalary()
+    let prev_leftover = getPrevMonthLeftOver();
+    let total_out = Object.values(total_expense).reduce((a, b) => a + b, 0) - Object.values(will_be_back).reduce((a, b) => a + b, 0);
+
+    console.log("Salary: " + salary);
+    console.log("Prev Month Leftover: " + prev_leftover);
+    console.log("Total In: " + (salary + prev_leftover));
+    console.log("Total Out: " + total_out + "\n");
+
+    let sum = 0;
+    for (let key of Object.keys(total_expense).sort()) {
+	if (will_be_back[key] > 0) {
+	    console.log(key + ": " + total_expense[key] + "\t( -" + will_be_back[key] + " )");
+	} else {
+	    console.log(key + ": " + total_expense[key]);
+	}
+
+	sum += total_expense[key] - will_be_back[key];
+	console.log("\t", sum);
+    }
+
+    // assert sum == total_out
+    if (sum != total_out) {
+	console.error("Error: Sum not equal to total_out");
+    }
+}
+
+main()
