@@ -36,7 +36,7 @@ for (let row of rows) {
 	} else if (text.includes("IRCTC Ap")) {
 		type = "Travel/IRCTC";
 	} else if (text.includes("IBM INDIA PRIVAT")) {
-		type = "Salary Credit";
+		type = "Salary";
 	} else if (text.includes("TO TRANSFER Debit account")) {
 		type = "Invest/Fixed Deposit";
 	} else if (text.includes("ICIC/bsestarmfr")) {
@@ -55,7 +55,7 @@ for (let row of rows) {
 	});
 }
 
-if (data.length > 0 && data[0].type == "Salary Credit") {
+if (data.length > 0 && data[0].type == "Salary") {
 	// Remove Salary Credit entry
 	data[0]["ignore"] = true
 }

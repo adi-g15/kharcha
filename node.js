@@ -12,25 +12,25 @@ if(!!process.argv[3]) {
 
 var data = require((process.argv[2][0] == "/" ? "":"./") + process.argv[2]);
 
-let total = {};
+let total_expense = {};
 let will_be_back = {};
 
 function detailedSummary() {
-    for (let e of data) if(!e.ignore && e.type != "comment") { total[e.type] = 0; will_be_back[e.type] = 0; }
-    for (let e of data) if(!e.ignore && e.type != "comment") { total[e.type] += e.debit - e.credit; will_be_back[e.type] += (e.will_be_back || 0); }
+    for (let e of data) if(!e.ignore && e.type != "comment") { total_expense[e.type] = 0; will_be_back[e.type] = 0; }
+    for (let e of data) if(!e.ignore && e.type != "comment") { total_expense[e.type] += e.debit - e.credit; will_be_back[e.type] += (e.will_be_back || 0); }
 }
 
 function briefSummary() {
     for (let e of data) if(!e.ignore && e.type != "comment") {
 	    const idx = e.type.indexOf("/")
 	    const type = e.type.substr(0, (idx != -1) ? idx: e.type.length)
-	    total[type] = 0;
+	    total_expense[type] = 0;
 	    will_be_back[type] = 0
     }
     for (let e of data) if(!e.ignore && e.type != "comment") {
 	    const idx = e.type.indexOf("/")
 	    const type = e.type.substr(0, (idx != -1) ? idx: e.type.length)
-	    total[type] += e.debit - e.credit;
+	    total_expense[type] += e.debit - e.credit;
 	    will_be_back[type] += (e.will_be_back || 0);
     }
 }
