@@ -51,7 +51,8 @@ for (let row of rows) {
 		debit,
 		credit,
 		balance,
-		type
+		type,
+		longterm: (type.startsWith("Invest") ? true: undefined),
 	});
 }
 
