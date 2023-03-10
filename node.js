@@ -17,7 +17,7 @@ let will_be_back = {};
 
 function detailedSummary() {
     for (let e of data) if(!e.ignore && e.type != "comment") { total_expense[e.type] = 0; will_be_back[e.type] = 0; }
-    for (let e of data) if(!e.ignore && e.type != "comment") { total_expense[e.type] += e.debit - e.credit; will_be_back[e.type] += (e.will_be_back || 0); }
+    for (let e of data) if(!e.ignore && e.type != "comment") { total_expense[e.type] = parseFloat( (total_expense[e.type] + e.debit - e.credit).toFixed(2) ); will_be_back[e.type] += (e.will_be_back || 0); }
 }
 
 function briefSummary() {
@@ -30,7 +30,7 @@ function briefSummary() {
     for (let e of data) if(!e.ignore && e.type != "comment") {
 	    const idx = e.type.indexOf("/")
 	    const type = e.type.substr(0, (idx != -1) ? idx: e.type.length)
-	    total_expense[type] += e.debit - e.credit;
+	    total_expense[type] = parseFloat( (total_expense[type] + e.debit - e.credit).toFixed(2) );
 	    will_be_back[type] += (e.will_be_back || 0);
     }
 }
@@ -66,7 +66,7 @@ function main() {
 
     let salary = getSalary()
     let prev_leftover = getPrevMonthLeftOver();
-    let total_out = Object.values(total_expense).reduce((a, b) => a + b, 0) - Object.values(will_be_back).reduce((a, b) => a + b, 0);
+    let total_out = parseFloat( (Object.values(total_expense).reduce((a, b) => a + b, 0) - Object.values(will_be_back).reduce((a, b) => a + b, 0)).toFixed(2) );
 
     console.log("Salary: " + salary);
     console.log("Prev Month Leftover: " + prev_leftover);
@@ -81,7 +81,7 @@ function main() {
 	    console.log(key + ": " + total_expense[key]);
 	}
 
-	sum += total_expense[key] - will_be_back[key];
+	sum = parseFloat( (sum + total_expense[key] - will_be_back[key]).toFixed(2) );
 	console.log("\t", sum);
     }
 
