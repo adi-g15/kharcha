@@ -71,8 +71,13 @@ function main() {
     let prev_leftover = getPrevMonthLeftOver();
     let total_out = parseFloat( (Object.values(total_expense).reduce((a, b) => a + b, 0) - Object.values(will_be_back).reduce((a, b) => a + b, 0)).toFixed(2) );
 
+    // Today's date (dd/mm/yyyy)
+    console.log("# " + new Date().toLocaleDateString("en-IN"));
+    console.log("=========================================");
+    console.log("\n```");
     console.log("Salary: " + salary);
     console.log("Prev Month Leftover: " + prev_leftover);
+    console.log("");
     console.log("Total In: " + (salary + prev_leftover));
     console.log("Total Out: " + total_out);
     console.log("");
@@ -98,6 +103,8 @@ function main() {
 	sum = parseFloat( (sum + total_expense[key] - will_be_back[key]).toFixed(2) );
 	console.log("\t", sum);
     }
+
+    console.log("```");
 
     // assert sum == total_out
     if (sum != total_out) {
