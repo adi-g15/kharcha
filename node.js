@@ -77,25 +77,19 @@ function getSalary() {
     return salary;
 }
 
-function getPrevMonthLeftOver() {
-    let prev_leftover = 0;
-
-    for (let e of data) {
-	// irrespective of "ignore", so can add custom entities to add prev_leftovers
-	if (e.prev_leftover == true) {
-	    prev_leftover += e.credit - e.debit;
-	}
-    }
-
-    return prev_leftover;
-}
-
 function main() {
     if (detailed) detailedSummary();
     else briefSummary()
 
     let salary = getSalary()
-    let prev_leftover = getPrevMonthLeftOver();
+
+	// irrespective of "ignore", so can add custom entities to add prev_leftovers
+	let leftover_summary = getBriefSummary(
+			data.filter(e => e.prev_leftover == true), "",
+			(sum, expenseObj) => parseFloat( (sum + expenseObj["credit"] - expenseObj["debit"]).toFixed(2) )
+	)
+    let prev_leftover = Object.values(leftover_summary).reduce((a, b) => a + b, 0)
+
     let total_out = parseFloat( (Object.values(total_expense).reduce((a, b) => a + b, 0) - Object.values(will_be_back).reduce((a, b) => a + b, 0)).toFixed(2) );
 
     // Today's date (dd/mm/yyyy)
@@ -104,7 +98,11 @@ function main() {
     console.log("\n```");
     console.log("Salary: " + salary);
     console.log("Prev Month Leftover: " + prev_leftover);
-    
+
+	for (let [key, value] of Object.entries(leftover_summary)) {
+		console.log("\t" + key + ": " + value);
+	}
+
     console.log("");
     console.log("Total In: " + (salary + prev_leftover));
     console.log("Total Out: " + total_out);
