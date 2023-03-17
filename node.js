@@ -53,7 +53,7 @@ function getBriefSummary(dataArr, fieldName, reducerFn) {
 
 function briefSummary() {
 	total_expense = getBriefSummary(
-		data.filter(e => !e.ignore && e["type"] != "comment"), "",
+		data.filter(e => !e.ignore && e["type"] != "comment" && !e["prev_leftover"]), "",
 		(sum, expenseObj) => parseFloat( (sum + expenseObj["debit"] - expenseObj["credit"]).toFixed(2) )
 	)
 
