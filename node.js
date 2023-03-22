@@ -110,6 +110,11 @@ function main() {
     console.log("Longterm expense: " + parseFloat( (Object.values(longterm).reduce((a, b) => a + b, 0) - Object.values(will_be_back).reduce((a, b) => a + b, 0)).toFixed(2) ));
     console.log("--------------------\n");
 
+	// filter 0 values
+	for (let [key, value] of Object.entries(total_expense)) {
+		if (value == 0) delete total_expense[key]
+	}
+
     let sum = 0;
     for (let key of Object.keys(total_expense).sort()) {
 	if (will_be_back[key] > 0 || longterm[key] > 0) {
