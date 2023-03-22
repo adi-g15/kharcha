@@ -1,6 +1,15 @@
 // To run on website console
 
-// let temp0 = /*Use "Use in Console" option on the <tbody> of the table*/ null;
+// If temp0 is not defined, attempt to find it
+if (!temp0) {
+	var temp0 = document.querySelector("table.table.table-hover.table-bordered.content_table.table-striped tbody")
+
+	// If temp0 is still not defined, then don't continue with declaring the variables
+	if (!temp0) {
+		/*Use "Use in Console" option on the <tbody> of the table*/
+		throw "temp0 is not defined";
+	}
+}
 
 let rows = Array.from(temp0.querySelectorAll("tr"));
 rows.pop();
