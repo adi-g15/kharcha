@@ -51,7 +51,7 @@ for (let row of rows) {
 	} else if (text.includes("ICIC/bsestarmfr")) {
 		type = "Invest/Mutual Fund";
 	} else if (text.includes("WDL ATM CASH")) {
-		type = "ATM_Withdrawal";
+		type = "CashWithdrawal";
 	}
 
 	data.push({
