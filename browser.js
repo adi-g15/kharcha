@@ -69,3 +69,6 @@ if (data.length > 0 && data[0].type == "Salary") {
 	// Remove Salary Credit entry
 	data[0]["ignore"] = true
 }
+
+// print `data` array in console
+data
