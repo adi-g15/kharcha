@@ -50,8 +50,13 @@ function getBriefSummary(dataArr, fieldName, reducerFn) {
 	let obj = {}
 
 	if ( !reducerFn ) {
-		// @note that both arguments have different types
-		reducerFn = (sum, expenseObj) => parseFloat( (sum + (expenseObj[fieldName] || 0)).toFixed(2) )
+		// @note that both arguments in reducerFn have different types
+		if ( !fieldName ) {
+			// if fieldName not provided, go by the simple debit/credit logic
+			reducerFn = (sum, expenseObj) => parseFloat( (sum + expenseObj["debit"] - expenseObj["credit"]).toFixed(2) )
+		} else {
+			reducerFn = (sum, expenseObj) => parseFloat( (sum + (expenseObj[fieldName] || 0)).toFixed(2) )
+		}
 	}
 
 	for (let e of dataArr) {
@@ -66,15 +71,13 @@ function getBriefSummary(dataArr, fieldName, reducerFn) {
 
 function briefSummary() {
 	total_expense = getBriefSummary(
-		data.filter(e => !e.ignore && e["type"] != "comment" && !e["prev_leftover"]), "",
-		(sum, expenseObj) => parseFloat( (sum + expenseObj["debit"] - expenseObj["credit"]).toFixed(2) )
+		data.filter(e => !e.ignore && e["type"] != "comment" && e["type"] != "Salary" && !e["prev_leftover"]), ""
 	)
 
 	will_be_back = getBriefSummary(data, "will_be_back")
 
 	longterm = getBriefSummary(
-		data.filter(e => e.longterm == true), "",
-		(sum, expenseObj) => parseFloat( (sum + expenseObj["debit"] - expenseObj["credit"]).toFixed(2) )
+		data.filter(e => e.longterm == true), ""
 	);
 }
 
