@@ -11,6 +11,28 @@ if (!temp0) {
 	}
 }
 
+let merchants = {
+	"HungerBox": "Food/Riviera",
+	"Daalchini/PYTM": "Food/Riviera",
+	"Mr SAGAR/PYTM": "Food/Outside",
+	"RAJU KUM/YESB": "Food/Outside",
+	"SASTA MA/HDFC": "Food/Fruits",
+	"B SUMIYY/YESB": "Food/Fruits",
+	"SIVANANT": "Food/Fruits",
+	"SADAM S": "Food/Fruits",
+	"NETFLIX": "Entertainment/Netflix",
+	"NEXTBILLION TECH": "Invest/Groww",
+	"BMTC BUS": "Travel/Bus",
+	"Bangalor/INDB": "Travel/Metro",
+	"TSF Food/PYTM": "Shopping/ISCON",
+	"Infiniti/ICIC/tata": "Shopping/Croma",
+	"IRCTC Ap": "Travel/IRCTC",
+	"IBM INDIA PRIVAT": "Salary",
+	"TO TRANSFER Debit account": "Invest/Fixed Deposit",
+	"ICIC/bsestarmfr": "Invest/Mutual Fund",
+	"WDL ATM CASH": "CashWithdrawal",
+};
+
 let rows = Array.from(temp0.querySelectorAll("tr"));
 rows.pop();
 
@@ -26,32 +48,10 @@ for (let row of rows) {
 
 	let type = "";
 
-	if (text.includes("HungerBox") || text.includes("Daalchini/PYTM")) {
-		type = "Food/Riviera";
-	} else if (text.includes("Mr SAGAR/PYTM") || text.includes("RAJU KUM/YESB")) {
-		type = "Food/Outside";
-	} else if (text.includes("SASTA MA/HDFC") || text.includes("B SUMIYY/YESB")) {
-		type = "Food/Fruits";
-	} else if (text.includes("NETFLIX")) {
-		type = "Entertainment/Netflix";
-	} else if (text.includes("NEXTBILLION TECH")) {
-		type = "Invest/Groww";
-	} else if (text.includes("Bangalor/INDB")) {
-		type = "Travel/Metro";
-	} else if (text.includes("TSF Food/PYTM")) {
-		type = "Shopping/ISCON";
-	} else if (text.includes("Infiniti/ICIC/tata")) {
-		type = "Shopping/Croma";
-	} else if (text.includes("IRCTC Ap")) {
-		type = "Travel/IRCTC";
-	} else if (text.includes("IBM INDIA PRIVAT")) {
-		type = "Salary";
-	} else if (text.includes("TO TRANSFER Debit account")) {
-		type = "Invest/Fixed Deposit";
-	} else if (text.includes("ICIC/bsestarmfr")) {
-		type = "Invest/Mutual Fund";
-	} else if (text.includes("WDL ATM CASH")) {
-		type = "CashWithdrawal";
+	for (let key in merchants) {
+		if (text.includes(key)) {
+			type = merchants[key]
+		}
 	}
 
 	data.push({
