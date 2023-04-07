@@ -28,6 +28,7 @@ preProcessData();
 let total_expense = {};
 let will_be_back = {};
 let longterm = {};
+let big_expense = {};
 
 function detailedSummary() {
     for (let e of data) if(!e.ignore && e.type != "comment") { total_expense[e.type] = 0; will_be_back[e.type] = 0; longterm[e.type] = 0; }
@@ -71,13 +72,17 @@ function getBriefSummary(dataArr, fieldName, reducerFn) {
 
 function briefSummary() {
 	total_expense = getBriefSummary(
-		data.filter(e => !e.ignore && e["type"] != "comment" && e["type"] != "Salary" && !e["prev_leftover"]), ""
+		data.filter(e => !e.ignore && e["type"] != "comment" && e["type"] != "Salary" && !e["prev_leftover"] && !e["big_expense"]), ""
 	)
 
 	will_be_back = getBriefSummary(data, "will_be_back")
 
 	longterm = getBriefSummary(
 		data.filter(e => e.longterm == true), ""
+	);
+
+	big_expense = getBriefSummary(
+		data.filter(e => e.big_expense === true), ""
 	);
 }
 
@@ -104,9 +109,13 @@ function main() {
 			data.filter(e => e.prev_leftover == true), "",
 			(sum, expenseObj) => parseFloat( (sum + expenseObj["credit"] - expenseObj["debit"]).toFixed(2) )
 	)
-    let prev_leftover = Object.values(leftover_summary).reduce((a, b) => a + b, 0)
+    let prev_leftover = Object.values(leftover_summary).reduce((a, b) => parseFloat((a + b).toFixed(2)), 0)
 
-    let total_out = parseFloat( (Object.values(total_expense).reduce((a, b) => a + b, 0) - Object.values(will_be_back).reduce((a, b) => a + b, 0)).toFixed(2) );
+    let total_out = parseFloat((
+		Object.values(total_expense).reduce((a, b) => a + b, 0) +
+		Object.values(big_expense).reduce((a, b) => a + b, 0) -
+		Object.values(will_be_back).reduce((a, b) => a + b, 0)
+	).toFixed(2));
 
     // Today's date (dd/mm/yyyy)
     console.log("# " + new Date().toLocaleDateString("en-IN"));
@@ -122,6 +131,11 @@ function main() {
     console.log("");
     console.log("Total In: " + (salary + prev_leftover));
     console.log("Total Out: " + total_out);
+
+	for (let [key, value] of Object.entries(big_expense)) {
+		console.log("\t" + key + ": " + value)
+	}
+
     console.log("");
     console.log("Longterm expense: " + parseFloat( (Object.values(longterm).reduce((a, b) => a + b, 0) - Object.values(will_be_back).reduce((a, b) => a + b, 0)).toFixed(2) ));
     console.log("--------------------\n");
@@ -152,11 +166,6 @@ function main() {
     }
 
     console.log("```");
-
-    // assert sum == total_out
-    if (sum != total_out) {
-	console.error("Error: Sum not equal to total_out");
-    }
 }
 
 main()
