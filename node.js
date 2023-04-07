@@ -12,6 +12,19 @@ if(!!process.argv[3]) {
 
 var data = require((process.argv[2][0] == "/" ? "":"./") + process.argv[2]);
 
+function preProcessData() {
+	for (let entry of data) {
+		entry["debit"] = entry["debit"] || 0;
+		entry["credit"] = entry["credit"] || 0;
+
+		if (entry["type"] === "Rent") {
+			entry["big_expense"] = true;
+		}
+	}
+}
+
+preProcessData();
+
 let total_expense = {};
 let will_be_back = {};
 let longterm = {};
