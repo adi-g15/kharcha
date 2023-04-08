@@ -137,7 +137,7 @@ function main() {
 	}
 
     console.log("");
-    console.log("Longterm expense: " + parseFloat( (Object.values(longterm).reduce((a, b) => a + b, 0) - Object.values(will_be_back).reduce((a, b) => a + b, 0)).toFixed(2) ));
+    console.log("Longterm expense: " + parseFloat( Object.values(longterm).reduce((a, b) => a + b, 0).toFixed(2) ));
     console.log("--------------------\n");
 
 	// filter 0 values
