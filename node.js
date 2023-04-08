@@ -13,12 +13,15 @@ if(!!process.argv[3]) {
 var data = require((process.argv[2][0] == "/" ? "":"./") + process.argv[2]);
 
 function preProcessData() {
+	// these are to be used for big spends/home
+	const special_expense_types = [/^Home/, /^Rent$/];
+
 	for (let entry of data) {
 		entry["debit"] = entry["debit"] || 0;
 		entry["credit"] = entry["credit"] || 0;
 
-		if (entry["type"] === "Rent") {
-			entry["big_expense"] = true;
+		if (special_expense_types.some(regexp => regexp.test(entry["type"]))) {
+			entry["special_expense"] = true;
 		}
 	}
 }
@@ -28,7 +31,7 @@ preProcessData();
 let total_expense = {};
 let will_be_back = {};
 let longterm = {};
-let big_expense = {};
+let special_expense = {};
 
 function detailedSummary() {
     for (let e of data) if(!e.ignore && e.type != "comment") { total_expense[e.type] = 0; will_be_back[e.type] = 0; longterm[e.type] = 0; }
@@ -72,7 +75,7 @@ function getBriefSummary(dataArr, fieldName, reducerFn) {
 
 function briefSummary() {
 	total_expense = getBriefSummary(
-		data.filter(e => !e.ignore && e["type"] != "comment" && e["type"] != "Salary" && !e["prev_leftover"] && !e["big_expense"]), ""
+		data.filter(e => !e.ignore && e["type"] != "comment" && e["type"] != "Salary" && !e["prev_leftover"] && !e["special_expense"]), ""
 	)
 
 	will_be_back = getBriefSummary(data, "will_be_back")
@@ -81,8 +84,8 @@ function briefSummary() {
 		data.filter(e => e.longterm == true), ""
 	);
 
-	big_expense = getBriefSummary(
-		data.filter(e => e.big_expense === true), ""
+	special_expense = getBriefSummary(
+		data.filter(e => e.special_expense === true), ""
 	);
 }
 
@@ -113,7 +116,7 @@ function main() {
 
     let total_out = parseFloat((
 		Object.values(total_expense).reduce((a, b) => a + b, 0) +
-		Object.values(big_expense).reduce((a, b) => a + b, 0) -
+		Object.values(special_expense).reduce((a, b) => a + b, 0) -
 		Object.values(will_be_back).reduce((a, b) => a + b, 0)
 	).toFixed(2));
 
@@ -132,7 +135,7 @@ function main() {
     console.log("Total In: " + (salary + prev_leftover));
     console.log("Total Out: " + total_out);
 
-	for (let [key, value] of Object.entries(big_expense)) {
+	for (let [key, value] of Object.entries(special_expense)) {
 		console.log("\t" + key + ": " + value)
 	}
 
