@@ -1,0 +1,22 @@
+{
+  "name": "kharcha",
+  "version": "1.0.0",
+  "description": "Scripts to automate expense summary from SBI Bank Statement",
+  "main": "node.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adi-g15/kharcha.git"
+  },
+  "author": "Aditya Gupta <me.adityag15 at gmail dot com>",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/adi-g15/kharcha/issues"
+  },
+  "homepage": "https://github.com/adi-g15/kharcha#readme",
+  "dependencies": {
+    "asciichart": "^1.5.25"
+  }
+}
