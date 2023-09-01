@@ -1,3 +1,4 @@
+(function () {
 // To run on website console
 
 // If temp0 is not defined, attempt to find it
@@ -42,9 +43,9 @@ for (let row of rows) {
 
 	let date = cells[0].innerText.trim().substr(0, 11) /*Assuming date is dd-mmm-yyyy*/;
 	let text = cells[1].innerText.trim();
-	let debit = parseFloat(cells[3].innerText.trim().replace(",","")) || 0;
-	let credit = parseFloat(cells[4].innerText.trim().replace(",","")) || 0;
-	let balance = parseFloat(cells[5].innerText.trim().replace(",","")) || 0;
+	let debit = parseFloat(cells[3].innerText.trim().replaceAll(",","")) || 0;
+	let credit = parseFloat(cells[4].innerText.trim().replaceAll(",","")) || 0;
+	let balance = parseFloat(cells[5].innerText.trim().replaceAll(",","")) || 0;
 
 	let type = "";
 
@@ -71,4 +72,6 @@ if (data.length > 0 && data[0].type == "Salary") {
 }
 
 // print `data` array in console
-data
+return data;
+}());
+
