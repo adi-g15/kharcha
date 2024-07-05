@@ -12,28 +12,6 @@ if (!temp0) {
 	}
 }
 
-let merchants = {
-	"HungerBox": "Food/Riviera",
-	"Daalchini/PYTM": "Food/Riviera",
-	"Mr SAGAR/PYTM": "Food/Outside",
-	"RAJU KUM/YESB": "Food/Outside",
-	"SASTA MA/HDFC": "Food/Fruits",
-	"B SUMIYY/YESB": "Food/Fruits",
-	"SIVANANT": "Food/Fruits",
-	"SADAM S": "Food/Fruits",
-	"NETFLIX": "Entertainment/Netflix",
-	"NEXTBILLION TECH": "Invest/Groww",
-	"BMTC BUS": "Travel/Bus",
-	"Bangalor/INDB": "Travel/Metro",
-	"TSF Food/PYTM": "Shopping/ISCON",
-	"Infiniti/ICIC/tata": "Shopping/Croma",
-	"IRCTC Ap": "Travel/IRCTC",
-	"IBM INDIA PRIVAT": "Salary",
-	"TO TRANSFER Debit account": "Invest/Fixed Deposit",
-	"ICIC/bsestarmfr": "Invest/Mutual Fund",
-	"WDL ATM CASH": "CashWithdrawal",
-};
-
 let rows = Array.from(temp0.querySelectorAll("tr"));
 rows.pop();
 
@@ -47,21 +25,12 @@ for (let row of rows) {
 	let credit = parseFloat(cells[4].innerText.trim().replaceAll(",","")) || 0;
 	let balance = parseFloat(cells[5].innerText.trim().replaceAll(",","")) || 0;
 
-	let type = "";
-
-	for (let key in merchants) {
-		if (text.includes(key)) {
-			type = merchants[key]
-		}
-	}
-
 	data.push({
 		date,
 		text,
 		debit,
 		credit,
 		balance,
-		type,
 		longterm: (type.startsWith("Invest") ? true: undefined),
 	});
 }

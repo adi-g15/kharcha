@@ -16,7 +16,9 @@
     "url": "https://github.com/adi-g15/kharcha/issues"
   },
   "homepage": "https://github.com/adi-g15/kharcha#readme",
+  "type": "module",
   "dependencies": {
-    "asciichart": "^1.5.25"
+    "asciichart": "^1.5.25",
+    "csv-parse": "^5.5.6"
   }
 }
