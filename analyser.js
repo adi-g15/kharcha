@@ -1,133 +1,23 @@
-#!/usr/bin/env node
-
-import asciichart from "asciichart";
-import { readFileSync, writeFileSync, mkdtemp } from "fs";
-
-if (!process.argv[2]) {
-	console.error("Require a file to process");
-	process.exit(1)
-}
-
-let detailed = false;
-if(!!process.argv[3]) {
-	detailed = true;
-}
-
-const data = JSON.parse(readFileSync(process.argv[2]));
-
-let merchants = {
-        "WDL ATM CASH": "CashWithdrawal",
-
-        "PVR Elan": "Entertainment/Movie",
-
-        "B SUMIYY/YESB": "Food/Fruits",
-        "Daalchini/PYTM": "Food/Riviera",
-        "HungerBox": "Food/Riviera",
-        "KRISHNA SAGAR": "Food/Outside",
-        "Mr SAGAR/PYTM": "Food/Outside",
-        "RAJU KUM/YESB": "Food/Outside",
-        "SADAM S": "Food/Fruits",
-        "SASTA MA/HDFC": "Food/Fruits",
-        "SIVANANT": "Food/Fruits",
-        "SRI GANE/PYTM": "Food/Juice",
-
-        "BECHU SAH/SBIN/9795": "Home",
-
-        "for TDR": "Invest/FD",
-        "ICIC/bsestarmfr": "Invest/MF",
-	"ICCLGROWW-GROWW-BS": "Invest/Groww",
-        "Nextbill/HDFC/groww.razo/Pay": "Invest/Groww",
-        "Nextbill/ICIC/groww.razo/Pay": "Invest/Groww",
-        "NEXTBILLION TECH": "Invest/Groww",
-        "Indian Clearin": "Invest/Groww",
-        "INDIAN CLEARIN": "Invest/Groww",
-        "RDInstallment": "Invest/RD",
-        "RD INSTALLMENT": "Invest/RD",
-        "WITHDRAWAL TRANSFER": "Invest/RD",
-
-        "G GOPALA/PYTM/pay": "Looks/Haircut",
-
-        "IBM INDIA PRIVAT": "Salary",
-	"ADITYA  GUPTA-AG": "Salary/SelfTransfer",
-
-        "DECATHLO/HDFC/decathlon": "Shopping/Decathlon",
-        "DMART SRINI": "Shopping/DMART",
-        "DmartIndia": "Shopping/DMART",
-        "Infiniti/ICIC/tata": "Shopping/Croma",
-        "MORE RET/ICIC/MoreRetail": "Shopping/More",
-        "RELIANCE/ICIC/jiomartgro/JIO20": "Shopping/JioMart",
-        "TSF Food/PYTM": "Shopping/ISCON",
-
-        "Google P": "Subscription/GoogleOne",
-        "NETFLIX": "Subscription/Netflix",
-
-        "Bangalor/INDB": "Travel/Metro",
-        "BMTC BUS": "Travel/Bus",
-        "BMTC20.rzp": "Travel/Bus",
-        "IRCTC Ap": "Travel/IRCTC",
-        "Rapido/UTIB/rapid": "Travel/Rapido",
-        "Roppen20/PYTM/pay": "Travel/Rapido",
-        "Roppen T": "Travel/Rapido"
-};
-
-function preProcessData() {
-	// these are to be used for big spends/home
-	const special_expense_types = [/^Home/, /^Rent$/];
-
-	for (let entry of data) {
-		entry["debit"] = entry["debit"] || 0;
-		entry["credit"] = entry["credit"] || 0;
-
-		const {text, debit, credit} = entry;
-		let type = entry["type"]
-
-		if (!type) {
-			for (let key in merchants) {
-				if (text.includes(key)) {
-					type = merchants[key]
-				}
-			}
-		}
-	
-		// If type still not assigned, just ignore small values
-		if (!type) {
-			if (((debit == 0) && (credit <= 20)) ||
-				((debit <= 20) && (credit == 0))) {
-				type = "Misc";
-			}
-		}
-
-		entry["type"] = type || "";
-
-		if (special_expense_types.some(regexp => regexp.test(entry["type"]))) {
-			entry["special_expense"] = true;
-		}
-	}
-}
-
-function updateDataInFile() {
-	mkdtemp("temp-", (err, folder) => {
-		if (err) {
-			console.error(err);
-		} else {
-			const json_filepath = folder + "/data.json";
-			console.log("Updated records saved to: ", json_filepath);
-			writeFileSync(json_filepath, JSON.stringify(data, null, 4));
-		}
-	})
-}
-
-preProcessData();
-updateDataInFile();
-
 let total_expense = {};
 let will_be_back = {};
 let longterm = {};
 let special_expense = {};
 
-function detailedSummary() {
-    for (let e of data) if(!e.ignore && e.type != "comment") { total_expense[e.type] = 0; will_be_back[e.type] = 0; longterm[e.type] = 0; }
-    for (let e of data) if(!e.ignore && e.type != "comment") { total_expense[e.type] = parseFloat( (total_expense[e.type] + e.debit - e.credit).toFixed(2) ); will_be_back[e.type] += (e.will_be_back || 0); if(e.longterm) longterm[e.type] += e.debit-e.credit; }
+function detailedSummary(data) {
+	for (let e of data)
+		if(!e.ignore && e.type != "comment") {
+			total_expense[e.type] = 0;
+			will_be_back[e.type] = 0;
+			longterm[e.type] = 0;
+		}
+
+	for (let e of data)
+		if(!e.ignore && e.type != "comment") {
+			total_expense[e.type] = parseFloat( (total_expense[e.type] + e.debit - e.credit).toFixed(2) );
+			will_be_back[e.type] += (e.will_be_back || 0);
+			if(e.longterm)
+				longterm[e.type] += e.debit-e.credit;
+		}
 }
 
 /*
@@ -140,7 +30,6 @@ function detailedSummary() {
  *       it does NOT take into account the fact that it is "type: comment"
  *
  *       Do that yourself before passing the data array here
- *
  * */
 function getBriefSummary(dataArr, fieldName, reducerFn) {
 	let obj = {}
@@ -165,7 +54,7 @@ function getBriefSummary(dataArr, fieldName, reducerFn) {
 	return obj;
 }
 
-function briefSummary() {
+function briefSummary(data) {
 	total_expense = getBriefSummary(
 		data.filter(
 			e => !e.ignore &&
@@ -189,23 +78,23 @@ function briefSummary() {
 	);
 }
 
-function getSalary() {
-    let salary = 0;
+function getSalary(data) {
+	let salary = 0;
 
-    for(let e of data) {
-	if(e.type == "Salary") {
-	    salary += e.credit;
-	}
-    }
+	for(let e of data)
+		if(e.type == "Salary")
+			salary += e.credit;
 
-    return salary;
+	return salary;
 }
 
-function main() {
-    if (detailed) detailedSummary();
-    else briefSummary()
-
-    let salary = getSalary()
+export function kharchaAnalysis(data, is_detailed = true) {
+	if (is_detailed)
+		detailedSummary(data);
+	else
+		briefSummary(data)
+	
+	let salary = getSalary(data)
 
 	// irrespective of "ignore", so can add custom entities to add prev_leftovers
 	let leftover_summary = getBriefSummary(
@@ -272,17 +161,17 @@ function main() {
 	let total_expense_arr = Object.entries(total_expense).sort((a,b) => b[1]-a[1])
     for (let key of total_expense_arr.map(entry => entry[0])) {
 	if (will_be_back[key] > 0 || longterm[key] > 0) {
-	    process.stdout.write(key + ": " + total_expense[key] + "\t( ");
+		process.stdout.write(key + ": " + total_expense[key] + "\t( ");
 
-	    if (will_be_back[key] > 0) process.stdout.write("-" + will_be_back[key]);
-	    if (will_be_back[key] > 0 && longterm[key] > 0) process.stdout.write(" , ");
+		if (will_be_back[key] > 0) process.stdout.write("-" + will_be_back[key]);
+		if (will_be_back[key] > 0 && longterm[key] > 0) process.stdout.write(" , ");
 
-	    // '*' is used to indicate longterm expense
-	    if (longterm[key] > 0) process.stdout.write("*" + (longterm[key] - will_be_back[key]));
+		// '*' is used to indicate longterm expense
+		if (longterm[key] > 0) process.stdout.write("*" + (longterm[key] - will_be_back[key]));
 
-	    console.log(" )");
+		console.log(" )");
 	} else {
-	    console.log(key + ": " + total_expense[key]);
+		console.log(key + ": " + total_expense[key]);
 	}
 
 	sum = parseFloat( (sum + total_expense[key] - will_be_back[key]).toFixed(2) );
@@ -292,4 +181,3 @@ function main() {
     console.log("```");
 }
 
-main()

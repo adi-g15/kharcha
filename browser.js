@@ -30,8 +30,7 @@ for (let row of rows) {
 		text,
 		debit,
 		credit,
-		balance,
-		longterm: (type.startsWith("Invest") ? true: undefined),
+		balance
 	});
 }
 
