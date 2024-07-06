@@ -88,7 +88,7 @@ function getSalary(data) {
 	return salary;
 }
 
-export function kharchaAnalysis(data, is_detailed = true) {
+export function kharchaAnalysis(data, is_detailed) {
 	if (is_detailed)
 		detailedSummary(data);
 	else
@@ -101,7 +101,7 @@ export function kharchaAnalysis(data, is_detailed = true) {
 			data.filter(e => e.prev_leftover == true), "",
 			(sum, expenseObj) => parseFloat( (sum + expenseObj["credit"] - expenseObj["debit"]).toFixed(2) )
 	)
-    let prev_leftover = Object.values(leftover_summary).reduce((a, b) => parseFloat((a + b).toFixed(2)), 0)
+	let prev_leftover = Object.values(leftover_summary).reduce((a, b) => parseFloat((a + b).toFixed(2)), 0)
 
 	let invest_withdraw_summary = getBriefSummary(
 			data.filter(e => e.type == "Invest/Withdraw"), "",
@@ -115,34 +115,34 @@ export function kharchaAnalysis(data, is_detailed = true) {
 	)
 	let lent_repaid = Object.values(lent_repaid_summary).reduce((a, b) => (a + b), 0)
 
-    let total_out = parseFloat((
+	let total_out = parseFloat((
 		Object.values(total_expense).reduce((a, b) => a + b, 0) +
 		Object.values(special_expense).reduce((a, b) => a + b, 0) -
 		Object.values(will_be_back).reduce((a, b) => a + b, 0)
 	).toFixed(2));
 
-    // Today's date (dd/mm/yyyy)
-    console.log("# " + new Date().toLocaleDateString("en-IN"));
-    console.log("=========================================");
-    console.log("\n```");
-    console.log("Salary: " + salary);
-    console.log("Prev Month Leftover: " + prev_leftover);
+	// Today's date (dd/mm/yyyy)
+	console.log("# " + new Date().toLocaleDateString("en-IN"));
+	console.log("=========================================");
+	console.log("\n```");
+	console.log("Salary: " + salary);
+	console.log("Prev Month Leftover: " + prev_leftover);
 
 	for (let [key, value] of Object.entries(leftover_summary)) {
 		console.log("\t" + key + ": " + value);
 	}
 
-    console.log("");
-    console.log("Total In: " + (salary + prev_leftover + invest_withdrawal + lent_repaid).toFixed(2));
-    console.log("Total Out: " + total_out);
+	console.log("");
+	console.log("Total In: " + (salary + prev_leftover + invest_withdrawal + lent_repaid).toFixed(2));
+	console.log("Total Out: " + total_out);
 
 	for (let [key, value] of Object.entries(special_expense)) {
 		console.log("\t" + key + ": " + value)
 	}
 
-    console.log("");
-    console.log("Longterm expense: " + parseFloat( Object.values(longterm).reduce((a, b) => a + b, 0).toFixed(2) ));
-    console.log("--------------------\n");
+	console.log("");
+	console.log("Longterm expense: " + parseFloat( Object.values(longterm).reduce((a, b) => a + b, 0).toFixed(2) ));
+	console.log("--------------------\n");
 
 	// @ref: stackoverflow.com/a/38446764
 	const now = new Date();
@@ -156,10 +156,10 @@ export function kharchaAnalysis(data, is_detailed = true) {
 		if (value == 0) delete total_expense[key]
 	}
 
-    let sum = 0;
+	let sum = 0;
 	// Object.entries returns array of pairs, sort it in descending order
 	let total_expense_arr = Object.entries(total_expense).sort((a,b) => b[1]-a[1])
-    for (let key of total_expense_arr.map(entry => entry[0])) {
+	for (let key of total_expense_arr.map(entry => entry[0])) {
 	if (will_be_back[key] > 0 || longterm[key] > 0) {
 		process.stdout.write(key + ": " + total_expense[key] + "\t( ");
 
@@ -178,6 +178,6 @@ export function kharchaAnalysis(data, is_detailed = true) {
 	console.log("\t", sum);
     }
 
-    console.log("```");
+	console.log("```");
 }
 

@@ -4,6 +4,12 @@ import { askBam } from "./ai_ask.js";
 const merchants = {
 	"WDL ATM CASH": "CashWithdrawal",
 
+	"SPLITWISE": "Splitwise",
+	"ACH DEBIT RETURN CHARGES": "Penalty",
+	"ACH C-": "Dividend_n_Interest", /* Maybe */
+	"INTEREST PAID": "Dividend_n_Interest", /* Maybe */
+	"BILLPAY DR-HDFC": "CreditCard",
+
 	"PVR Elan": "Entertainment/Movie",
 
 	"B SUMIYY/YESB": "Food/Fruits",
@@ -25,7 +31,16 @@ const merchants = {
 	"KRISHNA SAGAR": "Food/Outside",
 	"Mr SAGAR/PYTM": "Food/Outside",
 	"RAJU KUM/YESB": "Food/Outside",
+	"SHRI KRISHNA": "Food/Outside",
+	"OUTING": "Food/Outside",
+	"LUNCH": "Food/Outside",
+	"MITHAI": "Food/Outside",
+	"IDLI": "Food/Outside",
+	"ICECREAM": "Food/Outside",
 	"HungerBox": "Food/Riviera",
+	"HUNGERBOX": "Food/Riviera",
+	"AMLA JUICE": "Food/Supplements",
+	"MEDICINE": "Food/Supplements",
 
 	"BECHU SAH/SBIN/9795": "Home",
 
@@ -37,11 +52,13 @@ const merchants = {
 	"NEXTBILLION TECH": "Invest/Groww",
 	"Indian Clearin": "Invest/Groww",
 	"INDIAN CLEARIN": "Invest/Groww",
+	"GROWW INVEST": "Invest/Groww",
 	"RDInstallment": "Invest/RD",
 	"RD INSTALLMENT": "Invest/RD",
 	"WITHDRAWAL TRANSFER": "Invest/RD",
 
-	"G GOPALA/PYTM/pay": "Looks/Haircut",
+	"G GOPALA/PYTM/pay": "Grooming/Haircut",
+	"SOAP": "Grooming/Things",
 
 	"CAKE": "Misc",
 	"TOP UP": "Misc",
@@ -50,12 +67,14 @@ const merchants = {
 	"ADITYA  GUPTA-AG": "Salary/SelfTransfer",
 
 	"DECATHLO/HDFC/decathlon": "Shopping/Decathlon",
+	"SHOE SHOP": "Shopping/Shoe",
 	"DMART SRINI": "Shopping/DMART",
 	"DmartIndia": "Shopping/DMART",
 	"Infiniti/ICIC/tata": "Shopping/Croma",
 	"MORE RET/ICIC/MoreRetail": "Shopping/More",
 	"RELIANCE/ICIC/jiomartgro/JIO20": "Shopping/JioMart",
 	"TSF Food/PYTM": "Shopping/ISCON",
+	"BLINKIT": "Shopping/Blinking",
 
 	"Google P": "Subscription/GoogleOne",
 	"NETFLIX": "Subscription/Netflix",
@@ -66,7 +85,11 @@ const merchants = {
 	"IRCTC Ap": "Travel/IRCTC",
 	"Rapido/UTIB/rapid": "Travel/Rapido",
 	"Roppen20/PYTM/pay": "Travel/Rapido",
-	"Roppen T": "Travel/Rapido"
+	"Roppen T": "Travel/Rapido",
+	"RAPIDO": "Travel/Rapido",
+	"UBER": "Travel/Cab",
+	"CAB": "Travel/Cab",
+	"AUTO": "Travel/Auto",
 };
 
 /* Assign 'type' label using AI. Will NOT overwrite 'type' labels if

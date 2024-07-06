@@ -5,3 +5,4 @@ data.json
 node_modules
 temp-*
 .env
+records/
