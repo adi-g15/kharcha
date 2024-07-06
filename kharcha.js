@@ -75,7 +75,7 @@ if (args.json) {
 
 /* STAGE 2 - Assign Types */
 const stage2_input = stage1_output;
-const stage2_output = assignTypes(stage2_input);
+const stage2_output = await assignTypes(stage2_input);
 saveDataInFile(stage2_output);
 
 /* Stage 3 - Analysis */

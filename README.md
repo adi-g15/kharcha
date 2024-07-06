@@ -6,6 +6,9 @@ for expenses during a time period (depending on duration of the statement)
 Recently I did a redesign of this, so that adding different bank statement
 support can be added more easily. Please do contribute if you do add any :)
 
+> Experimental: Using IBM BAM AI models to categorise the transactions
+> (https://bam.res.ibm.com/)
+
 Read more in [Design section](#design).
 
 ## Usage
