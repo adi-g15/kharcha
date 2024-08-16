@@ -1,7 +1,7 @@
 import { mkdtemp, writeFileSync } from "fs";
 import { askBam } from "./ai_ask.js";
 
-const merchants = {
+let merchants = {
 	"WDL ATM CASH": "CashWithdrawal",
 
 	"SPLITWISE": "Splitwise",
@@ -11,6 +11,7 @@ const merchants = {
 	"BILLPAY DR-HDFC": "CreditCard",
 
 	"PVR Elan": "Entertainment/Movie",
+	"PVR INOX": "Entertainment/Movie",
 
 	"B SUMIYY/YESB": "Food/Fruits",
 	"SADAM S": "Food/Fruits",
@@ -34,13 +35,16 @@ const merchants = {
 	"SHRI KRISHNA": "Food/Outside",
 	"OUTING": "Food/Outside",
 	"LUNCH": "Food/Outside",
-	"MITHAI": "Food/Outside",
 	"IDLI": "Food/Outside",
 	"ICECREAM": "Food/Outside",
 	"HungerBox": "Food/Riviera",
 	"HUNGERBOX": "Food/Riviera",
 	"AMLA JUICE": "Food/Supplements",
 	"MEDICINE": "Food/Supplements",
+	"Zomato": "Food/Order",
+	"Swiggy": "Food/Order",
+	"Kanti Sweets": "Food/Sweets",
+	"MITHAI": "Food/Sweets",
 
 	"BECHU SAH/SBIN/9795": "Home",
 
@@ -56,6 +60,7 @@ const merchants = {
 	"RDInstallment": "Invest/RD",
 	"RD INSTALLMENT": "Invest/RD",
 	"WITHDRAWAL TRANSFER": "Invest/RD",
+	"Insurance premium": "Insurance",
 
 	"G GOPALA/PYTM/pay": "Grooming/Haircut",
 	"SOAP": "Grooming/Things",
@@ -74,12 +79,14 @@ const merchants = {
 	"MORE RET/ICIC/MoreRetail": "Shopping/More",
 	"RELIANCE/ICIC/jiomartgro/JIO20": "Shopping/JioMart",
 	"TSF Food/PYTM": "Shopping/ISCON",
-	"BLINKIT": "Shopping/Blinking",
+	"BLINKIT": "10MinDelivery/Blinkit",
+	"Zepto": "10MinDelivery/Blinkit",
 
 	"Google P": "Subscription/GoogleOne",
 	"NETFLIX": "Subscription/Netflix",
 
 	"Bangalor/INDB": "Travel/Metro",
+	"Amazon Metro": "Travel/Metro", /*Metro card recharge*/
 	"BMTC BUS": "Travel/Bus",
 	"BMTC20.rzp": "Travel/Bus",
 	"IRCTC Ap": "Travel/IRCTC",
@@ -90,6 +97,13 @@ const merchants = {
 	"UBER": "Travel/Cab",
 	"CAB": "Travel/Cab",
 	"AUTO": "Travel/Auto",
+
+	"Gift Cards": "GiftCard",
+	"Added Amazon Pay balance": "GiftCard",
+
+	"Cashback received": "Cashback",
+
+	"Paid on Amazon": "Orders/Amazon"
 };
 
 /* Assign 'type' label using AI. Will NOT overwrite 'type' labels if
@@ -154,6 +168,14 @@ async function assignTypesWithAI(untagged_records) {
 }
 
 export async function assignTypes(data, use_ai) {
+	/* change all keys in 'merchants' array to lower-case, so search is
+	 * case-insensitive */
+	const updated_merchants = {}
+	for (let key of Object.keys(merchants)) {
+	  updated_merchants[key.toLowerCase()] = merchants[key];
+	}
+	merchants = updated_merchants
+
 	// these are to be used for big spends/home
 	const special_expense_types = [/^Home/, /^Rent$/];
 
@@ -166,7 +188,8 @@ export async function assignTypes(data, use_ai) {
 
 		if (!type) {
 			for (let key in merchants) {
-				if (text.includes(key)) {
+				/* case-insensitive lookup */
+				if (text.toLowerCase().includes(key)) {
 					type = merchants[key]
 				}
 			}
