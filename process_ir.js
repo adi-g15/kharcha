@@ -1,4 +1,7 @@
 import { mkdtemp, writeFileSync } from "fs";
+import fs from "fs";
+import isSymlinkSync from "is-symlink-sync";
+
 import { askBam } from "./ai_ask.js";
 
 let merchants = {
@@ -239,6 +242,14 @@ export function saveDataInFile(data) {
 			const json_filepath = folder + "/data.json";
 			console.log("Updated records saved to: ", json_filepath);
 			writeFileSync(json_filepath, JSON.stringify(data, null, 4));
+
+			/* create a link for simplicity */
+			const link_filepath = "temp-latest.json";
+			if (isSymlinkSync(link_filepath)) {
+				/* isSymlinkSync also checks if the file exists */
+				fs.unlinkSync(link_filepath);
+			}
+			fs.symlinkSync(json_filepath, link_filepath);
 		}
 	})
 }
