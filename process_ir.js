@@ -153,7 +153,7 @@ async function assignTypesWithAI(untagged_records) {
 	}
 }
 
-export async function assignTypes(data) {
+export async function assignTypes(data, use_ai) {
 	// these are to be used for big spends/home
 	const special_expense_types = [/^Home/, /^Rent$/];
 
@@ -198,7 +198,12 @@ export async function assignTypes(data) {
 		/*giving 6 entries of tagged data*/
 		...data.sort(() => 0.5 - Math.random()).filter(record => record["type"] != "").splice(0, 6)
 		]
-	await assignTypesWithAI(ai_input);
+
+	/* only use AI if mentioned, since due to it continuously failing due
+	 * to changes in BAM */
+	if (use_ai) {
+		await assignTypesWithAI(ai_input);
+	}
 
 	return data
 }

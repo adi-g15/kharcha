@@ -33,6 +33,10 @@ const args = yargs(hideBin(process.argv))
 		describe: "Provide a JSON file for analysis", /* should be in IR form */
 		type: "string"
 	})
+	.option("use-ai", {
+		describe: "Use AI to label the data (default: off)",
+		type: "boolean"
+	})
 	.help()
 	.parse();
 
@@ -48,6 +52,8 @@ if (!args.hdfc && !args.json) {
 	console.error("One of '--sbi'/'--hdfc'/'--amazon'/'--json' is required");
 	exit(1);
 }
+
+const use_ai = args["use-ai"] || false
 
 /* STAGE 0 - Input (JSON or any filepath passed without option) */
 const input_file = args.json || args._[0];
@@ -86,7 +92,7 @@ if (args.json) {
 
 /* STAGE 2 - Assign Types */
 const stage2_input = stage1_output;
-const stage2_output = await assignTypes(stage2_input);
+const stage2_output = await assignTypes(stage2_input, use_ai);
 saveDataInFile(stage2_output);
 
 /* Stage 3 - Analysis */
