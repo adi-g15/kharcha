@@ -17,11 +17,22 @@ transactions = Array.from(transactions_div.querySelectorAll("#transaction-deskto
 result_json = transactions.map(entry => {
 	/* fill details available in summary */
 	summary = entry.querySelector(".a-column.a-span9.a-text-left")
+	amount = entry.querySelector(".a-row").querySelector(".a-column.a-span3.a-span-last").innerText
+	is_debit = amount.startsWith('-')
+	amount_val = Number(amount.split('₹')[1])
+
+	/* IR format requires these keys at minimum:
+         date: String,
+         text: String,
+         debit: Number,
+         credit: Number,
+	*/
 
 	transaction = {
+		"date": summary.children[2].innerText,
 		"text": summary.querySelector(".pad-header-text").innerText,
-		"time": summary.children[2].innerText,
-		"amount": entry.querySelector(".a-row").querySelector(".a-column.a-span3.a-span-last").innerText,
+		"debit": is_debit ? amount_val: undefined,
+		"credit": is_debit ? undefined: amount_val
 	}
 
 	/* skip some transaction details */
@@ -69,4 +80,12 @@ result_json = transactions.map(entry => {
 })
 
 /* Personal preferences now */
-result_json = result_json.filter(e => !e["text"].includes("On-hold")).filter(e => !e["text"].includes("Released"))
+result_json = result_json.filter(e => {
+	return !(
+		e["text"].includes("On-hold") ||
+		e["text"].includes("Released") ||
+		e["text"].includes("Refunded on Amazon") ||
+		e["text"].includes("Refund from Amazon\nAmazon Pay Balance")
+		)
+})
+
