@@ -58,8 +58,7 @@ const stage0_output = readFileSync(input_file).toString();
  *	text: String,
  *	debit: Number,
  *	credit: Number,
- *	balance: Number,
- *  ... any other keys/data is also okay
+ *  ... any other keys/data, like 'balance'/'note' is also okay but not required
  *	}
  * */
 const stage1_input = stage0_output;

@@ -9,6 +9,8 @@ support can be added more easily. Please do contribute if you do add any :)
 > Experimental: Using IBM BAM AI models to categorise the transactions
 > (https://bam.res.ibm.com/)
 
+![Design diagram of kharcha](./assets/kharcha-script.drawio.svg)
+
 Read more in [Design section](#design).
 
 ## Usage
@@ -43,7 +45,7 @@ The design is similar to how some compilers work, where there can be
 multiple sources ('source languages' in case of compilers), all of which
 much convert to a known & expected format of "Intermediate Representation",
 which in our case is just a list of objects, where each object must have
-some keys such as 'text', 'debit', 'credit', 'balance' and 'date' etc.
+some keys such as 'text', 'debit', 'credit' and 'date' etc.
 
 The current design splits the process of analysing into 4 stages:
 
@@ -60,7 +62,6 @@ Stage 1: Convert passed input into IR (Intermediate Representation)
                 text: String,
                 debit: Number,
                 credit: Number,
-                balance: Number,
          }
 
 > Rest of the stages are now independent of whether it's an SBI/HDFC/ICICI
