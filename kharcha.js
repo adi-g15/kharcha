@@ -40,7 +40,6 @@ const args = yargs(hideBin(process.argv))
 	.help()
 	.parse();
 
-console.log(args)
 /* SBI and Amazon statements are being generated using browser scripts,
  * which already generates in the IR format */
 if (args.sbi || args.amazon) {

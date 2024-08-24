@@ -15,6 +15,7 @@ let merchants = {
 
 	"PVR Elan": "Entertainment/Movie",
 	"PVR INOX": "Entertainment/Movie",
+	"Chitramandira": "Entertainment/Movie",
 
 	"B SUMIYY/YESB": "Food/Fruits",
 	"SADAM S": "Food/Fruits",
@@ -23,6 +24,7 @@ let merchants = {
 	"SRI GANE/PYTM": "Food/Juice",
 	"SRI GANESH FRUIT JUI": "Food/Juice",
 	"NANDINI-PAYTMQR": "Food/Milk",
+	"UPI-NANDINI": "Food/Milk",
 	"Dudh": "Food/Milk",
 	"Milk": "Food/Milk",
 	"MILK": "Food/Milk",
@@ -32,6 +34,7 @@ let merchants = {
 	"ANDE": "Food/DailyEssentials",
 	"MITHAI": "Food/Outside",
 	"Daalchini/PYTM": "Food/Riviera",
+	"UPI-DRAGON HOUSE": "Food/Pyramid",
 	"KRISHNA SAGAR": "Food/Outside",
 	"Mr SAGAR/PYTM": "Food/Outside",
 	"RAJU KUM/YESB": "Food/Outside",
@@ -39,7 +42,12 @@ let merchants = {
 	"OUTING": "Food/Outside",
 	"LUNCH": "Food/Outside",
 	"IDLI": "Food/Outside",
+	"MOMOS": "Food/Outside",
+	"THAR THE TASTE OF": "Food/Outside",
+	"UPI-BANGALORE FOOD": "Food/Outside",
+	"UPI-RESTAURANT BRANDS ": "Food/Outside",
 	"ICECREAM": "Food/Outside",
+	"UPI-CHULHA CHAUKI DA DHABA": "Food/Outside",
 	"HungerBox": "Food/Riviera",
 	"HUNGERBOX": "Food/Riviera",
 	"AMLA JUICE": "Food/Supplements",
@@ -48,6 +56,8 @@ let merchants = {
 	"Swiggy": "Food/Order",
 	"Kanti Sweets": "Food/Sweets",
 	"MITHAI": "Food/Sweets",
+	"INDIA SWEET HOUSE": "Food/Sweets",
+	"ADYAR ANANDA BHAVAN SWEET": "Food/Sweets",
 
 	"BECHU SAH/SBIN/9795": "Home",
 
@@ -64,6 +74,7 @@ let merchants = {
 	"RD INSTALLMENT": "Invest/RD",
 	"WITHDRAWAL TRANSFER": "Invest/RD",
 	"Insurance premium": "Insurance",
+	"POLICY BAZAAR": "Insurance",
 
 	"G GOPALA/PYTM/pay": "Grooming/Haircut",
 	"SOAP": "Grooming/Things",
@@ -78,6 +89,9 @@ let merchants = {
 	"SHOE SHOP": "Shopping/Shoe",
 	"DMART SRINI": "Shopping/DMART",
 	"DmartIndia": "Shopping/DMART",
+	"AVENUE SUPERMARTS": "Shopping/DMART",
+	"UPI-G MART": "Shopping/Shops",
+	"UPI-LIFE STYLE INTERNATI": "Shopping/Lifestyle",
 	"Infiniti/ICIC/tata": "Shopping/Croma",
 	"MORE RET/ICIC/MoreRetail": "Shopping/More",
 	"RELIANCE/ICIC/jiomartgro/JIO20": "Shopping/JioMart",
@@ -89,10 +103,10 @@ let merchants = {
 	"NETFLIX": "Subscription/Netflix",
 
 	"Bangalor/INDB": "Travel/Metro",
-	"Amazon Metro": "Travel/Metro", /*Metro card recharge*/
 	"BMTC BUS": "Travel/Bus",
 	"BMTC20.rzp": "Travel/Bus",
-	"IRCTC Ap": "Travel/IRCTC",
+	"IRCTC": "Travel/IRCTC",
+	"Indian Railway Caterin": "Travel/IRCTC",
 	"Rapido/UTIB/rapid": "Travel/Rapido",
 	"Roppen20/PYTM/pay": "Travel/Rapido",
 	"Roppen T": "Travel/Rapido",
@@ -106,7 +120,12 @@ let merchants = {
 
 	"Cashback received": "Cashback",
 
-	"Paid on Amazon": "Orders/Amazon"
+	"Paid on Amazon": "Orders/Amazon",
+	"Meesho": "Orders/Meesho",
+
+	"JIOIN APP DIRECT": "Recharge/Mobile",
+	"PZRECHARGE": "Recharge/Mobile",
+	"Amazon Metro": "Recharge/Metro", /*Metro card recharge*/
 };
 
 /* Assign 'type' label using AI. Will NOT overwrite 'type' labels if
