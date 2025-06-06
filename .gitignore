@@ -6,3 +6,4 @@ node_modules
 temp-*
 .env
 records/
+__pycache__

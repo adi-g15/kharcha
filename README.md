@@ -47,7 +47,7 @@ much convert to a known & expected format of "Intermediate Representation",
 which in our case is just a list of objects, where each object must have
 some keys such as 'text', 'debit', 'credit' and 'date' etc.
 
-The current design splits the process of analysing into 4 stages:
+The current design splits the process of analysing into 3 stages:
 
 Stage 1: Convert passed input into IR (Intermediate Representation)
          This is source dependent, ie. HDFC statement will require
