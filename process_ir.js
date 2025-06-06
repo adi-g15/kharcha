@@ -7,7 +7,18 @@ import { askBam } from "./ai_ask.js";
 let merchants = {
 	"WDL ATM CASH": "CashWithdrawal",
 
+	"DEPOSIT TRANSFER INT": "Invest/Interest",
+	"BULK POSTING ACHCr": "Invest/Dividend",
+
+	"DEBIT SWEEP": "Invest/MOD",
+	"TRANSFER CREDIT": "Invest/MOD",
+
+	"TO TRANSFER UPI": "BankTransfers",
+
 	"SPLITWISE": "Splitwise",
+	"BY TRANSFER UPI": "Splitwise/Returned",	/* Assuming all inward UPI transactions are splitwise clearing */
+	"BY TRANSFER NEFT": "Invest/Redeemed",		/* Assuming all inward NEFT is redeemed mutual funds */
+
 	"ACH DEBIT RETURN CHARGES": "Penalty",
 	"ACH C-": "Dividend_n_Interest", /* Maybe */
 	"INTEREST PAID": "Dividend_n_Interest", /* Maybe */
@@ -21,6 +32,7 @@ let merchants = {
 	"SADAM S": "Food/Fruits",
 	"SASTA MA/HDFC": "Food/Fruits",
 	"SIVANANT": "Food/Fruits",
+	"PUSHPA SIVANANT": "Food/Fruits",
 	"SRI GANE/PYTM": "Food/Juice",
 	"SRI GANESH FRUIT JUI": "Food/Juice",
 	"NANDINI-PAYTMQR": "Food/Milk",
