@@ -16,25 +16,19 @@ def detailed_summary(data):
 	longterm = {}
 
 	for e in data:
-		if not e.get("ignore") and e.get("type") != "comment":
-			total_expense[e["type"]] = 0
-			will_be_back[e["type"]] = 0
-			longterm[e["type"]] = 0
+		total_expense[e["type"]] = 0
+		will_be_back[e["type"]] = 0
+		longterm[e["type"]] = 0
 
 	for e in data:
-		if not e.get("ignore") and e.get("type") != "comment":
-			total_expense[e["type"]] = round(total_expense[e["type"]] + e.get("debit", 0) - e.get("credit", 0), 2)
-			will_be_back[e["type"]] += e.get("will_be_back", 0)
-			if e.get("longterm"):
-				longterm[e["type"]] += e.get("debit", 0) - e.get("credit", 0)
+		total_expense[e["type"]] = round(total_expense[e["type"]] + e.get("debit", 0) - e.get("credit", 0), 2)
+		will_be_back[e["type"]] += e.get("will_be_back", 0)
+		if e.get("longterm"):
+			longterm[e["type"]] += e.get("debit", 0) - e.get("credit", 0)
 
 # @note It doesn't take into account any complex handling, such as
-#       it does NOT take into account the fact that it is "ignore: true"
-#       it does NOT take into account the fact that it is "type: comment"
 #       it does NOT take into account the fact that it is "will_be_back"
 #       it does NOT take into account the fact that it is "longterm"
-#       it does NOT take into account the fact that it is "ignore: true"
-#       it does NOT take into account the fact that it is "type: comment"
 #
 #       Do that yourself before passing the data array here
 def get_brief_summary(data, field_name=None, reducer_fn=None):
@@ -68,8 +62,7 @@ def kharcha_analysis(data, is_detailed):
     else:
         global total_expense, longterm, will_be_back
         total_expense = get_brief_summary([
-            e for e in data if not e.get("ignore")
-            and e.get("type") not in ["comment", "Salary", "Invest/Withdraw", "Lent/Repaid"]
+            e for e in data if e.get("type") not in ["Salary", "Invest/Withdraw", "Lent/Repaid"]
             and not e.get("prev_leftover")
         ])
 
