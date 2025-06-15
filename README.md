@@ -6,6 +6,13 @@ for expenses during a time period (depending on duration of the statement)
 Recently I did a redesign of this, so that adding different bank statement
 support can be added more easily. Please do contribute if you do add any :)
 
+As of now, the tool has following backends:
+* HDFC Bank Statement: Delimited Format
+* HDFC Credit Card Statements: PDF format, and Delimited format, supports atleast Regalia/Rupay/Swiggy cards
+* SBI Bank Statement: PDF format
+* Amazon Pay Statement: Need to run a script in browser to extract data, as Amazon doesn't support exporting it
+* Generic JSON format: must follow the mentioned IR below, it's easy
+
 > Experimental: Using IBM BAM AI models to categorise the transactions
 > (https://bam.res.ibm.com/)
 
