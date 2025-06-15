@@ -63,7 +63,6 @@ def kharcha_analysis(data, is_detailed):
         global total_expense, longterm, will_be_back
         total_expense = get_brief_summary([
             e for e in data if e.get("type") not in ["Salary", "Invest/Withdraw", "Lent/Repaid"]
-            and not e.get("prev_leftover")
         ])
 
         will_be_back = get_brief_summary(data, "will_be_back")
@@ -71,13 +70,6 @@ def kharcha_analysis(data, is_detailed):
         longterm = get_brief_summary([e for e in data if e.get("longterm") is True])
 
     salary = get_salary(data)
-
-    leftover_summary = get_brief_summary(
-        [e for e in data if e.get("prev_leftover") is True],
-        None,
-        lambda sum, e: round(sum + e.get("credit", 0) - e.get("debit", 0), 2)
-    )
-    prev_leftover = round(sum(leftover_summary.values()), 2)
 
     invest_withdraw_summary = get_brief_summary(
         [e for e in data if e.get("type") == "Invest/Withdraw"],
@@ -101,14 +93,10 @@ def kharcha_analysis(data, is_detailed):
     print("# " + dt.today().strftime("%d/%m/%Y"))
     print("=========================================")
     print("\n```")
-    print(f"Salary: {salary}")
-    print(f"Prev Month Leftover: {prev_leftover}")
-
-    for k, v in leftover_summary.items():
-        print(f"\t{k}: {v}")
-
-    print("")
-    print(f"Total In: {round(salary + prev_leftover + invest_withdrawal + lent_repaid, 2)}")
+#    print(f"Salary: {salary}")
+#
+#    print("")
+#    print(f"Total In: {round(salary + invest_withdrawal + lent_repaid, 2)}")
     print(f"Total Out: {total_out}")
 
     print("")
