@@ -5,16 +5,13 @@ import io
 import pdfplumber
 import pandas as pd
 
-def _is_df_row_empty(row):
-	return all([pd.isna(cell) or str(cell).strip() == '' for cell in row])
-
 def hdfc_cc_pdf_convert_to_ir(filepath):
 	file = pdfplumber.open(filepath)
 
 	# TODO: Add a verification check to verify all transactions are
 	# accounted for
 
-	trx_cols = ['Date', 'Transaction Description', 'Amount (in Rs.)']
+	trx_cols = ['Date', 'Transaction Description', 'Feature Reward', 'Amount (in Rs.)']
 	merged_df = pd.DataFrame(columns=trx_cols)
 
 	for page in file.pages:
@@ -23,25 +20,28 @@ def hdfc_cc_pdf_convert_to_ir(filepath):
 			df.columns = df.iloc[0]
 			df = df.iloc[1:, :-1]
 
-			if df.columns.shape != (3,):
-				# Valid table will have 3 columns as 'trx_cols'
+			# Ensure mandatory columns such as date/description and amount
+			# exist in the table, else it's probably some other table
+			# structure in the pdf
+			if ("Date" not in df.columns):
+				continue
+			if ("Amount (in Rs.)" not in df.columns):
+				continue
+			if ("Transaction Description" not in df.columns):
 				continue
 
-			if not (df.columns == trx_cols).all():
-				# Not a valid transaction table
-				continue
-
-			# Remove empty rows
-			df = df[~df.apply(_is_df_row_empty, axis=1)]
+			# Fill na/None with empty strings for further remove operations
+			df = df.fillna('')
 
 			# Remove rows containing no 'Date' or 'Amount'
 			# Like, a row contains "ADITYA GUPTA" in transaction
 			# description to denote which person's account the transaction
 			# is for, remove such rows
+			# If a table spans multiple page, it can also contains rows
+			# with Feature point
 			df = df[~(
-			    df['Date'].str.strip().eq('') &
-			    df['Amount (in Rs.)'].str.strip().eq('') &
-			    df['Transaction Description'].str.strip().ne('')
+			    df['Date'].str.strip().eq('') |
+			    df['Amount (in Rs.)'].str.strip().eq('')
 			)]
 
 			# Remove bill payments
@@ -52,11 +52,15 @@ def hdfc_cc_pdf_convert_to_ir(filepath):
 			merged_df = pd.concat([merged_df, df], axis=0,
 						 ignore_index=True)
 
+	# Columns like 'Feature Reward' can have NaN on concat
+	merged_df = merged_df.fillna('')
+
 	print(merged_df)
 
 	trx_list = []
 	for _idx, row in merged_df.iterrows():
 		amount = row["Amount (in Rs.)"]
+		points = row["Feature Reward"]
 
 		# Remove commas from amount
 		amount = amount.replace(',', '')
@@ -65,7 +69,8 @@ def hdfc_cc_pdf_convert_to_ir(filepath):
 			"date": row["Date"],
 			"text": row["Transaction Description"],
 			"debit": float(amount) if not ("Cr" in amount) else 0,
-			"credit": float(amount.split()[0]) if ("Cr" in amount) else 0
+			"credit": float(amount.split()[0]) if ("Cr" in amount) else 0,
+			"x-points": int(points or 0)
 		})
 
 	return trx_list
