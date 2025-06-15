@@ -36,17 +36,17 @@ parser.add_argument("--use-ai",
 
 args = parser.parse_args()
 
-# SBI and Amazon statements are being generated using browser scripts,
-# which already generates in the IR format
-# hence, treat the input as if passed to '--json'
-if args.sbi:
-    args.json = args.sbi
-    args.sbi = None
+# Amazon statements are being generated using browser scripts, which
+# already generates in the IR format, hence treat the input as if passed to
+# '--json'
 if args.amazon:
-    args.json = args.amazon
+    if args.json is None:
+        args.json = []
+
+    args.json.extend(args.amazon)
     args.amazon = None
 
-if not (args.hdfc or args.hdfc_cc or args.json):
+if not (args.sbi or args.hdfc or args.hdfc_cc or args.json):
     print("One of '--sbi'/'--hdfc'/'--hdfc-cc'/'--amazon'/'--json' is required", file=sys.stderr)
     sys.exit(1)
 

@@ -30,14 +30,9 @@ downloaded file)
 ### SBI Bank Statements
 
 1. Login at https://retail.onlinesbi.sbi/retail/login.htm
-2. Go to bank statement page, where it shows it in a tabular format
-3. Open Developer Console, and copy paste content of 'browser.js'
-4. Copy the output array given, and save it some file (let's say FILENAME)
+2. Go to bank statement page, download the statement in PDF format
 
-Now run `./kharcha.js --sbi FILENAME`
-
-> As the browser.js already creates an IR format JSON, you can also use
-> `./kharcha.js --json FILENAME`
+Now run `./kharcha.js --sbi THE_PDF`
 
 ## Design
 
