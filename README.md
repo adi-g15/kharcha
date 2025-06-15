@@ -48,6 +48,7 @@ multiple sources ('source languages' in case of compilers), all of which
 much convert to a known & expected format of "Intermediate Representation",
 which in our case is just a list of objects, where each object must have
 some keys such as 'text', 'debit', 'credit' and 'date' etc.
+The internal implementation of this IR uses pandas DataFrames. If interested just look at one of the backends in backend/ directory.
 
 The current design splits the process of analysing into 3 stages:
 
