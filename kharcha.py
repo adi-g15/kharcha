@@ -8,11 +8,12 @@ import pandas as pd
 from backends.hdfc import hdfc_convert_to_ir, hdfc_cc_pdf_convert_to_ir
 from backends.sbi import sbi_convert_to_ir
 from analyser import kharcha_analysis
-from process_ir import assign_types, save_data_in_file
+from process_ir import assign_types, save_data_in_file, validate_ir
 
 parser = argparse.ArgumentParser(description="Statement Analyzer")
 
 parser.add_argument("--detailed",
+                    action='store_true',
                     help="Enable detailed report")
 parser.add_argument("--sbi",
                     action="extend", nargs="+", type=str,
@@ -69,18 +70,34 @@ use_ai = args.use_ai
 global_df = pd.DataFrame(columns=['date', 'text', 'amount'])
 if args.json:
     for filepath in args.json:
-        output = pd.read_json(path_or_buf=filepath)
+        output = pd.read_json(path_or_buf=filepath, convert_dates=False)
         global_df = pd.concat([global_df, output], axis=0, ignore_index=True)
+        validate_ir(global_df)
+
+if args.sbi:
+    for filepath in args.sbi:
+        output = sbi_convert_to_ir(filepath)
+        global_df = pd.concat([global_df, output], axis=0, ignore_index=True)
+        validate_ir(global_df)
 
 if args.hdfc:
     for filepath in args.hdfc:
         output = hdfc_convert_to_ir(filepath)
         global_df = pd.concat([global_df, output], axis=0, ignore_index=True)
+        validate_ir(global_df)
 
 if args.hdfc_cc:
     for filepath in args.hdfc_cc:
         output = hdfc_cc_pdf_convert_to_ir(filepath)
         global_df = pd.concat([global_df, output], axis=0, ignore_index=True)
+        validate_ir(global_df)
+
+# Drop some invalid columns
+if "" in global_df.columns:
+	global_df = global_df.drop("", axis=1)
+
+if "null" in global_df.columns:
+	global_df = global_df.drop("null", axis=1)
 
 stage1_output = global_df
 
@@ -90,7 +107,7 @@ stage2_output = assign_types(stage2_input, use_ai)
 
 if stage2_output is None:
     print("Stage 1 can't give an output: Backend did not give valid IR")
-    exit(1)
+    sys.exit(1)
 
 save_data_in_file(stage2_output)
 

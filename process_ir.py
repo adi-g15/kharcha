@@ -19,6 +19,8 @@ merchants = {
 	"BULK POSTING ACHCr": "Invest/Dividend",
 
 	"DEBIT SWEEP": "Invest/MOD",
+	"SWEEP FROM": "Invest/MOD",
+	"SWEEP TO": "Invest/MOD",
 	"TRANSFER CREDIT": "Invest/MOD",
 
 	"TO TRANSFER UPI": "BankTransfers",
@@ -30,7 +32,11 @@ merchants = {
 	"ACH DEBIT RETURN CHARGES": "Penalty",
 	"ACH C-": "Dividend_n_Interest",		# Maybe
 	"INTEREST PAID": "Dividend_n_Interest",	# Maybe
-	"BILLPAY DR-HDFC": "CreditCard",
+	"BILLPAY DR-HDFC": "Bill/CreditCard",
+	"TELE TRANSFER CREDIT": "Bill/CreditCard",
+	"CC PAYMENT": "Bill/CreditCard",
+	"HDFC CC BILL": "Bill/CreditCard",
+	"DREAMPLUG PAYTEC": "Bill/CreditCard",	# Cred Bill pay
 
 	"PVR Elan": "Entertainment/Movie",
 	"PVR INOX": "Entertainment/Movie",
@@ -145,11 +151,20 @@ merchants = {
 	"Swiggy Cashback": "Cashback/Swiggy",
 
 	"Paid on Amazon": "Orders/Amazon",
+	"AmazonPay": "Orders/Amazon",
+	"Flipkart Internet": "Orders/Flipkart",
 	"Meesho": "Orders/Meesho",
 
 	"JIOIN APP DIRECT": "Recharge/Mobile",
 	"PZRECHARGE": "Recharge/Mobile",
 	"Amazon Metro": "Recharge/Metro",	# Metro card recharge
+
+	"KLG CO CHANDIGARH": "JWellery/Gold",
+
+	"EDUCATION": "Education/Fees",
+	"NEUROGLIA HEALTH PR": "Education/Course",
+
+	"CLOTHIN": "Shopping/Clothing",
 }
 
 # Assign 'type' label using AI. Will NOT overwrite 'type' labels if
@@ -232,9 +247,16 @@ def assign_types(df, use_ai) -> pd.DataFrame:
 
 	# Check if debit and credit only have numerical data
 	if not pd.to_numeric(df['debit'], errors='coerce').notnull().all():
-		exit(1)
+		print("Corrupt IR: 'debit' field has non-numeric data")
+		print(df[pd.to_numeric(df['debit'], errors='coerce').isna()])
+		sys.exit(1)
 	if not pd.to_numeric(df['credit'], errors='coerce').notnull().all():
-		exit(1)
+		print("Corrupt IR: 'credit' field has non-numeric data")
+		print(df[pd.to_numeric(df['debit'], errors='coerce').isna()])
+		sys.exit(1)
+
+	# Pre-process: Fill all NaNs with empty string
+	df = df.fillna('')
 
 	# Filter out rows which don't have amount or date
 	df = df[~(
@@ -324,5 +346,8 @@ def save_data_in_file(df: pd.DataFrame):
 		pass
 
 	os.symlink(json_filepath, link_filepath)
+
+def validate_ir(df: pd.DataFrame):
+	pass
 
 # vi: noexpandtab:

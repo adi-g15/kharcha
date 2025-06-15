@@ -57,8 +57,8 @@ def kharcha_analysis(df, is_detailed):
 
 		summary[type_] = summary.get(type_, 0) + val
 
-	investments = get_kharcha_in_type(summary, "invest")
-	salary		= get_kharcha_in_type(summary, "salary")
+	investments = get_kharcha_in_type(summary, "Invest")
+	salary		= get_kharcha_in_type(summary, "Salary")
 
 	summary.to_json(path_or_buf="/tmp/json")
 	total_out = round(summary.sum() - investments - salary, 2)
@@ -73,20 +73,14 @@ def kharcha_analysis(df, is_detailed):
 	print(f"Expenses: {total_out}")
 	print("--------------------\n")
 
-	# Sort the total expenses based on descending order
-	# Take the 0th row, sort it, then reindex summary based on that index
-	summary = summary.sort_values(ascending=False)
-	sum_so_far = 0
-
 	# Filter our investments and salary, as treating them separate
-	expenses = summary[~(summary.keys().str.startswith("salary") |
-					  summary.keys().str.startswith("invest"))]
+	expenses = summary[~(summary.keys().str.startswith("Salary") |
+					  summary.keys().str.startswith("Invest"))]
+	expenses = expenses.sort_values(ascending=False)
+
+	assert(round(expenses.sum(),2) == total_out)
 
 	print(expenses.to_string(dtype=False))
-	#for type_, value in expenses.items():
-	#	print(f"{type_}\t: {value}")
-	#	sum_so_far = round(sum_so_far + value, 2)
-	#	print("\t\t\t", sum_so_far)
 
 	print("```")
 

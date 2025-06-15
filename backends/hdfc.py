@@ -4,6 +4,7 @@ import csv
 import io
 import pdfplumber
 import pandas as pd
+from pathlib import Path
 
 def hdfc_cc_pdf_convert_to_ir(filepath):
 	file = pdfplumber.open(filepath)
@@ -33,24 +34,13 @@ def hdfc_cc_pdf_convert_to_ir(filepath):
 			if ("Transaction Description" not in df.columns):
 				continue
 
-			# Fill na/None with empty strings for further remove operations
-			df = df.fillna('')
-
-			# Remove rows containing no 'Date' or 'Amount'
-			# Like, a row contains "ADITYA GUPTA" in transaction
-			# description to denote which person's account the transaction
-			# is for, remove such rows
-			# If a table spans multiple page, it can also contains rows
-			# with Feature point
-			df = df[~(
-			    df['Date'].str.strip().eq('') |
-			    df['Amount (in Rs.)'].str.strip().eq('')
-			)]
-
-			# Remove bill payments
-			df = df[~(
-				df['Transaction Description'].str.contains("TELE TRANSFER CREDIT")
-			)]
+			# XXX: If checking with all statements, i guess we shouldn't skip any
+			# transaction, even bill payment
+			# # Remove bill payments
+			# df = df[~(
+			# 	df['Transaction Description'].str.contains("TELE TRANSFER CREDIT") |
+			# 	df['Transaction Description'].str.contains("CC PAYMENT")
+			# )]
 
 			merged_df = pd.concat([merged_df, df], axis=0,
 						 ignore_index=True)
@@ -67,11 +57,23 @@ def hdfc_cc_pdf_convert_to_ir(filepath):
 		"Feature Reward": "x-points"
 	})
 
+	# Remove rows containing no 'Date' or 'Amount'
+	# Like, a row contains "ADITYA GUPTA" in transaction
+	# description to denote which person's account the transaction
+	# is for, remove such rows
+	# If a table spans multiple page, it can also contains rows
+	# with Feature point
+	merged_df = merged_df[~(
+	    merged_df['date'].str.strip().eq('') |
+	    merged_df['Amount (in Rs.)'].str.strip().eq('')
+	)]
+
 	# Add keys required by IR
 	merged_df["debit"] = 0.0
 	merged_df["credit"] = 0.0
 
 	for idx, row in merged_df.iterrows():
+		text   = row["text"]
 		amount = row["Amount (in Rs.)"]
 
 		# Remove commas from amount
@@ -82,13 +84,19 @@ def hdfc_cc_pdf_convert_to_ir(filepath):
 		else:
 			merged_df.loc[idx, "debit"] = float(amount)
 
+		# In context of credit card, a NETBANKING transfer is almost always
+		# a Bill Payment
+		if "NETBANKING TRANSFER" in text:
+			merged_df.loc[idx, "type"] = "Bill/CreditCard"
+
 	merged_df = merged_df.drop("Amount (in Rs.)", axis=1)
+
+	merged_df["x-src"] = "hdfc-cc"
 
 	return merged_df
 
-
 # convert CSV credit card statement from HDFC mobile app
-def hdfc_cc_convert_to_ir(content):
+def hdfc_cc_csv_convert_to_ir(content):
 	start_idx = content.find("Transaction type~")
 	end_idx = content.rfind("Opening Bal~")
 
@@ -134,36 +142,88 @@ def hdfc_cc_convert_to_ir(content):
 
 	return ir_records
 
-def hdfc_convert_to_ir(content):
+# HDFC 'delimited' statement format is not really CSV
+# Because it doesn't quote text containing ','
+# Such as, if a cell has comma in-between, a valid CSV generally quotes the
+# text
+#
+# Such as the following transaction description:
+# NEFT DR-XXXXXXXXXXX-NNNNNN NNNN-NETBANK, MUM-NXXXXXXXXXXXXXXX-TRANSFERRING TO ME
+#
+# Above description is not quoted by HDFC website, and thus when read by a
+# CSV reader, or by pandas, it will get treated as 2 cells, even though it
+# should only be 1 cell
+#
+# Actually the pattern in HDFC's "delimited" format is actually that the
+# cell width match corresponding header field length
+#
+# HDFC's "delimited" format is shitter, the above pattern is not followed
+# for few fields, such as "Debit Amount", thus you are back to using ',' to
+# parse those fields.
+#
+# So, I use above length based pattern for first few cells, till we are
+# done with the "Narration" header, then fallback to split based on ','
+def hdfc_convert_to_ir(filepath) -> pd.DataFrame:
 	# hdfc statement had an empty line in beginning, strip content
-	content = content.strip()
+	content = Path(filepath).read_text()
 
 	# Check whether it's a credit card statement
-	if content.startswith("Name"):
-		return hdfc_cc_convert_to_ir(content)
+	if content.strip().startswith("Name"):
+		return hdfc_cc_csv_convert_to_ir(content)
 
-	f = io.StringIO(content)
-	reader = csv.reader(f)
+	lines = content.split('\n')
 
-	# read all rows
-	records = list(reader)
+	# filter empty lines
+	lines = [l for l in lines if l.strip() != '']
 
-	# ignore 1st record, as it's headers
-	records = records[1:]
+	header = lines[0].split(',')
 
-	# IR -> Intermediate Representation, which is JSON in our case
-	ir_records = []
-	for record in records:
-		ir_records.append({
-			# type will be assigned by backend
-			"date": record[0],
-			"text": record[1],
-			"debit": float(record[3]),
-			"credit": float(record[4]),
-			# additional fields
-			"ref_number": record[5],
-			"balance": float(record[6]),
-		})
+	# ignore 1st line, as it's headers
+	lines = lines[1:]
 
-	return ir_records
+	records = []
+	for line in lines:
+		entries = []
+		for hdr in header:
+			length = len(hdr)
+			entries.append(line[:length].strip())
+
+			# ignore first length+1 elements (cell length + comma)
+			line = line[length+1:]
+
+			if hdr.strip() == "Narration":
+				# we are done with 'Narration' text, now we can fallback to
+				# usual .split(',') for rest of the columns
+				break
+
+		# push rest of the cells
+		entries.extend([s.strip() for s in line.split(',')])
+		records.append(entries)
+
+	# Trim the header
+	header = [h.strip() for h in header]
+	df = pd.DataFrame(records, columns=header)
+
+	# Get the columns in IR format
+	df = df.rename(columns={
+		"Date": "date",
+		"Narration": "text",
+		"Debit Amount": "debit",
+		"Credit Amount": "credit",
+		"Chq/Ref Number": "x-ref-number",
+		"Closing Balance": "x-balance"
+	})
+
+	# Drop unnecessary columns
+	df = df.drop("Value Dat", axis=1)
+
+	# Auto assign types, mostly it will assign all dtypes as string
+	df = df.convert_dtypes()
+
+	df["debit"]  = df["debit"].apply(lambda x: float(x))
+	df["credit"] = df["credit"].apply(lambda x: float(x))
+
+	df["x-src"] = "hdfc"
+
+	return df
 
