@@ -6,7 +6,6 @@ from datetime import datetime as dt
 total_expense = {}
 will_be_back = {}
 longterm = {}
-special_expense = {}
 
 # Detailed Summary
 def detailed_summary(data):
@@ -67,19 +66,16 @@ def kharcha_analysis(data, is_detailed):
     if is_detailed:
         detailed_summary(data)
     else:
-        global total_expense, special_expense, longterm, will_be_back
+        global total_expense, longterm, will_be_back
         total_expense = get_brief_summary([
             e for e in data if not e.get("ignore")
             and e.get("type") not in ["comment", "Salary", "Invest/Withdraw", "Lent/Repaid"]
             and not e.get("prev_leftover")
-            and not e.get("special_expense")
         ])
 
         will_be_back = get_brief_summary(data, "will_be_back")
 
         longterm = get_brief_summary([e for e in data if e.get("longterm") is True])
-
-        special_expense = get_brief_summary([e for e in data if e.get("special_expense") is True])
 
     salary = get_salary(data)
 
@@ -106,7 +102,6 @@ def kharcha_analysis(data, is_detailed):
 
     total_out = round(
         sum(total_expense.values()) +
-        sum(special_expense.values()) -
         sum(will_be_back.values()), 2
     )
 
@@ -123,11 +118,8 @@ def kharcha_analysis(data, is_detailed):
     print(f"Total In: {round(salary + prev_leftover + invest_withdrawal + lent_repaid, 2)}")
     print(f"Total Out: {total_out}")
 
-    for k, v in special_expense.items():
-        print(f"\t{k}: {v}")
-
     print("")
-    print(f"Longterm expense: {round(sum(longterm.values()), 2)}")
+    print(f"Investments: {round(sum(longterm.values()), 2)}")
     print("--------------------\n")
 
     # Sort and print total_expense breakdown

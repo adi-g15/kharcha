@@ -66,8 +66,10 @@ merchants = {
 	"ICECREAM": "Food/Outside",
 	"UPI-CHULHA CHAUKI DA DHABA": "Food/Outside",
 	"HungerBox": "Food/Riviera",
+	"Eat Good Technologies": "Food/Riviera",
 	"AMLA JUICE": "Food/Supplements",
-	"MEDICINE": "Food/Supplements",
+	"MEDICINE": "Medical/Medicines",
+	"TATA 1MG": "Medical/LabTests",
 	"Zomato": "Food/Order",
 	"Swiggy": "Food/Order",
 	"Kanti Sweets": "Food/Sweets",
@@ -102,6 +104,7 @@ merchants = {
 
 	"DECATHLO/HDFC/decathlon": "Shopping/Decathlon",
 	"SHOE SHOP": "Shopping/Shoe",
+	"Myntra Designs": "Shopping/Myntra",
 	"DMART SRINI": "Shopping/DMART",
 	"DmartIndia": "Shopping/DMART",
 	"AVENUE SUPERMARTS": "Shopping/DMART",
@@ -112,7 +115,8 @@ merchants = {
 	"RELIANCE/ICIC/jiomartgro/JIO20": "Shopping/JioMart",
 	"TSF Food/PYTM": "Shopping/ISCON",
 	"BLINKIT": "10MinDelivery/Blinkit",
-	"Zepto": "10MinDelivery/Blinkit",
+	"Zepto": "10MinDelivery/Zepto",
+	"Instamart": "10MinDelivery/Instamart",
 
 	"Google P": "Subscription/GoogleOne",
 	"NETFLIX": "Subscription/Netflix",
@@ -134,6 +138,7 @@ merchants = {
 	"Added Amazon Pay balance": "GiftCard",
 
 	"Cashback received": "Cashback",
+	"Swiggy Cashback": "Cashback/Swiggy",
 
 	"Paid on Amazon": "Orders/Amazon",
 	"Meesho": "Orders/Meesho",
