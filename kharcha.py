@@ -56,6 +56,7 @@ elif args.hdfc_cc:
     stage0_output = args.hdfc_cc
 else:
     print("Stage 0 can't give an output: Unknown option passed")
+    exit(1)
 
 # STAGE 1 - Convert to JSON (our IR) */
 # 
@@ -84,6 +85,11 @@ elif args.hdfc_cc:
 # STAGE 2 - Assign Types
 stage2_input = stage1_output
 stage2_output = assign_types(stage2_input, use_ai)
+
+if stage2_output is None:
+    print("Stage 1 can't give an output: Backend did not give valid IR")
+    exit(1)
+
 save_data_in_file(stage2_output)
 
 # Stage 3 - Analysis

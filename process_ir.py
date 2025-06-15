@@ -7,6 +7,7 @@ import random
 import re
 import tempfile
 import shutil
+import pandas as pd
 
 from ai_ask import ask_bam
 
@@ -76,6 +77,7 @@ merchants = {
 	"MITHAI": "Food/Sweets",
 	"INDIA SWEET HOUSE": "Food/Sweets",
 	"ADYAR ANANDA BHAVAN SWEET": "Food/Sweets",
+	"Mujeeb A K": "Food/Kirana",
 
 	"BECHU SAH/SBIN/9795": "Home",
 
@@ -117,6 +119,8 @@ merchants = {
 	"BLINKIT": "10MinDelivery/Blinkit",
 	"Zepto": "10MinDelivery/Zepto",
 	"Instamart": "10MinDelivery/Instamart",
+
+	"FACTORY OUTLET": "Shopping/Shoes",
 
 	"Google P": "Subscription/GoogleOne",
 	"NETFLIX": "Subscription/Netflix",
@@ -210,25 +214,69 @@ async def assign_types_with_ai(untagged_records):
 			except Exception as e:
 				print(f"Warning: Could not parse AI response record: {record_str}", file=sys.stderr)
 
-def assign_types(data, use_ai):
+def assign_types(df, use_ai) -> pd.DataFrame:
+	# Ensure the dataframe has all columns mandated by IR
+	if "date" not in df.columns:
+		return None
+	if "text" not in df.columns:
+		return None
+	if "debit" not in df.columns:
+		return None
+	if "credit" not in df.columns:
+		return None
+
+	# Sort the columns such that optional columns are at end
+	mandatory_cols = ["date", "text", "debit", "credit"]
+	optional_cols = [col for col in df.columns.tolist() if col not in mandatory_cols]
+	df = df.reindex(columns=mandatory_cols + optional_cols)
+
+	# Check if debit and credit only have numerical data
+	if not pd.to_numeric(df['debit'], errors='coerce').notnull().all():
+		exit(1)
+	if not pd.to_numeric(df['credit'], errors='coerce').notnull().all():
+		exit(1)
+
+	# Filter out rows which don't have amount or date
+	df = df[~(
+		df['date'].str.strip().eq('')  |
+	    ((df['debit'] == 0) & (df['credit'] == 0))
+	)]
+
+	# Create a 'type' column to store category, if not existing already
+	if "type" not in df.columns:
+		df["type"] = ""
+
+	if "longterm" not in df.columns:
+		df["longterm"] = False
+
+	if "will_be_back" not in df.columns:
+		df["will_be_back"] = 0
+
+	# Sanitise the columns
+	df.columns = (
+		df.columns
+			.str.strip()
+			.str.lower()
+
+			# replace spaces with underscores
+			.str.replace(r'\s+', '_', regex=True)
+	)
+
 	# Lower-case version of merchants for case-insensitive matching
 	updated_merchants = {key.lower(): value for key, value in merchants.items()}
 
-	# Special expense regex patterns
-	special_expense_types = [
-		re.compile(r'^Home'),
-		re.compile(r'^Rent$')
-	]
-
 	# Process each entry
-	for entry in data:
-		entry["debit"] = entry.get("debit", 0)
-		entry["credit"] = entry.get("credit", 0)
+	for idx, row in df.iterrows():
+		df.loc[idx, "debit"]  = row["debit"] or 0.0
+		df.loc[idx, "credit"] = row["credit"] or 0.0
 
-		text = entry.get("text", "")
-		debit = entry["debit"]
-		credit = entry["credit"]
-		type_ = entry.get("type", "")
+		# Ensure we are using the updated row
+		row = df.loc[idx]
+
+		text   = row["text"]
+		debit  = row["debit"]
+		credit = row["credit"]
+		type_  = row["type"] or ''
 
 		# First try to match with merchants
 		if not type_:
@@ -243,45 +291,35 @@ def assign_types(data, use_ai):
 
 		# If type still not assigned, just ignore small values
 		if not type_:
-			if ((debit == 0 and credit <= 20) or (debit <= 20 and credit == 0)):
+			if ((debit == 0 and credit <= 50) or (debit <= 50 and credit == 0)):
 				type_ = "Misc"
 
 		# Mark longterm
 		if type_.startswith("Invest"):
-			entry["longterm"] = True
+			df.loc[idx, "longterm"] = True
 
 		# Assign type
-		entry["type"] = type_ or ""
-
-		# Mark special_expense
-		for regex in special_expense_types:
-			if regex.search(entry["type"]):
-				entry["special_expense"] = True
-				break
+		df.loc[idx, "type"] = type_
 
 	# AI tagging (optional)
 	if use_ai:
-		ai_input = []
+		print("AI tagging has been disabled now. As BAM AI has been sunset.")
 
-		# Entries without type
-		ai_input.extend([record for record in data if not record["type"]])
-
-		# Random sample of entries with type (max 6)
-		typed_records = [record for record in data if record["type"]]
-		ai_input.extend(random.sample(typed_records, k=min(6, len(typed_records))))
-
-		assign_types_with_ai(ai_input)
-
-	return data
+	return df
 
 # Save updated data in file.
-def save_data_in_file(data):
+def save_data_in_file(df: pd.DataFrame):
 	folder = tempfile.mkdtemp(prefix="temp-")
 
 	json_filepath = os.path.join(folder, "data.json")
-	print("Updated records saved to: ", json_filepath)
 	with open(json_filepath, "w") as f:
-		json.dump(data, f, indent=4)
+		json.dump(
+			df.to_dict(orient="records"),
+			f,
+			indent=4,
+			ensure_ascii=False
+		)
+	print("Updated records saved to: ", json_filepath)
 
 	# Create a link for simplicity.
 	link_filepath = "temp-latest.json"

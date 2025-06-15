@@ -1,134 +1,91 @@
 #!/usr/bin/env python3
 
 from datetime import datetime as dt
-
-# Define global variables
-total_expense = {}
-will_be_back = {}
-longterm = {}
-
-# Detailed Summary
-def detailed_summary(data):
-	global total_expense, will_be_back, longterm
-
-	total_expense = {}
-	will_be_back = {}
-	longterm = {}
-
-	for e in data:
-		total_expense[e["type"]] = 0
-		will_be_back[e["type"]] = 0
-		longterm[e["type"]] = 0
-
-	for e in data:
-		total_expense[e["type"]] = round(total_expense[e["type"]] + e.get("debit", 0) - e.get("credit", 0), 2)
-		will_be_back[e["type"]] += e.get("will_be_back", 0)
-		if e.get("longterm"):
-			longterm[e["type"]] += e.get("debit", 0) - e.get("credit", 0)
+import pandas as pd
 
 # @note It doesn't take into account any complex handling, such as
-#       it does NOT take into account the fact that it is "will_be_back"
-#       it does NOT take into account the fact that it is "longterm"
+#	   it does NOT take into account the fact that it is "will_be_back"
+#	   it does NOT take into account the fact that it is "longterm"
 #
-#       Do that yourself before passing the data array here
-def get_brief_summary(data, field_name=None, reducer_fn=None):
-    obj = {}
+#	   Do that yourself before passing the data array here
+def get_summary(data, field_name=None, reducer_fn=None):
+	obj = {}
 
-    if reducer_fn is None:
-        if field_name is None:
-            reducer_fn = lambda sum, e: round(sum + e.get("debit", 0) - e.get("credit", 0), 2)
-        else:
-            reducer_fn = lambda sum, e: round(sum + e.get(field_name, 0) or 0, 2)
+	if reducer_fn is None:
+		if field_name is None:
+			reducer_fn = lambda sum, e: round(sum + e.get("debit", 0) - e.get("credit", 0), 2)
+		else:
+			reducer_fn = lambda sum, e: round(sum + e.get(field_name, 0) or 0, 2)
 
-    for e in data:
-        # replicate JS logic: type is everything before '/'
-        typ = e.get("type", "")
-        idx = typ.find("/")
-        typ = typ if idx == -1 else typ[:idx]
+	for e in data:
+		# replicate JS logic: type is everything before '/'
+		typ = e.get("type", "")
+		idx = typ.find("/")
+		typ = typ if idx == -1 else typ[:idx]
 
-        # if empty type, allow ':' to appear just like JS for now
-        key = typ if typ != "" else "<Unknown>"
+		# if empty type, allow ':' to appear just like JS for now
+		key = typ if typ != "" else "<Unknown>"
 
-        obj[key] = reducer_fn(obj.get(key, 0), e)
+		obj[key] = reducer_fn(obj.get(key, 0), e)
 
-    return obj
+	return obj
 
 def get_salary(data):
-    return sum(e.get("credit", 0) for e in data if e.get("type") == "Salary")
+	return sum(e.get("credit", 0) for e in data if e.get("type") == "Salary")
 
-def kharcha_analysis(data, is_detailed):
-    if is_detailed:
-        detailed_summary(data)
-    else:
-        global total_expense, longterm, will_be_back
-        total_expense = get_brief_summary([
-            e for e in data if e.get("type") not in ["Salary", "Invest/Withdraw", "Lent/Repaid"]
-        ])
+def get_kharcha_in_type(series, type_):
+	filtered_idxs = series.keys().str.startswith(type_)
+	return series[filtered_idxs].sum()
 
-        will_be_back = get_brief_summary(data, "will_be_back")
+def kharcha_analysis(df, is_detailed):
+	print(df[df["type"].str.fullmatch('')])
 
-        longterm = get_brief_summary([e for e in data if e.get("longterm") is True])
+	if not is_detailed:
+		# If user doesn't want detailed summary we don't need detailed
+		# types
+		#
+		# Create a copy to ensure we don't modify original DataFrame
+		df = df.copy()
+		df["type"] = df["type"].str.split('/').str.get(0)
 
-    salary = get_salary(data)
+	summary = pd.Series(dtype='float')
+	for _, row in df.iterrows():
+		type_ = row["type"] if row["type"] != "" else "<Unknown>"
+		val   = row["debit"] - row["credit"] - row["will_be_back"]
 
-    invest_withdraw_summary = get_brief_summary(
-        [e for e in data if e.get("type") == "Invest/Withdraw"],
-        None,
-        lambda sum, e: round(sum + e.get("credit", 0) - e.get("debit", 0), 2)
-    )
-    invest_withdrawal = sum(invest_withdraw_summary.values())
+		summary[type_] = summary.get(type_, 0) + val
 
-    lent_repaid_summary = get_brief_summary(
-        [e for e in data if e.get("type") == "Lent/Repaid"],
-        None,
-        lambda sum, e: round(sum + e.get("credit", 0) - e.get("debit", 0), 2)
-    )
-    lent_repaid = sum(lent_repaid_summary.values())
+	investments = get_kharcha_in_type(summary, "invest")
+	salary		= get_kharcha_in_type(summary, "salary")
 
-    total_out = round(
-        sum(total_expense.values()) +
-        sum(will_be_back.values()), 2
-    )
+	summary.to_json(path_or_buf="/tmp/json")
+	total_out = round(summary.sum() - investments - salary, 2)
 
-    print("# " + dt.today().strftime("%d/%m/%Y"))
-    print("=========================================")
-    print("\n```")
-#    print(f"Salary: {salary}")
-#
-#    print("")
-#    print(f"Total In: {round(salary + invest_withdrawal + lent_repaid, 2)}")
-    print(f"Total Out: {total_out}")
+	print("# " + dt.today().strftime("%d/%m/%Y"))
+	print("=========================================")
+	print("\n```")
+	if salary > 0:
+		print(f"Salary: {salary}")
+	if investments > 0:
+		print(f"Investments: {investments}")
+	print(f"Expenses: {total_out}")
+	print("--------------------\n")
 
-    print("")
-    print(f"Investments: {round(sum(longterm.values()), 2)}")
-    print("--------------------\n")
+	# Sort the total expenses based on descending order
+	# Take the 0th row, sort it, then reindex summary based on that index
+	summary = summary.sort_values(ascending=False)
+	sum_so_far = 0
 
-    # Sort and print total_expense breakdown
-    total_expense_arr = sorted(total_expense.items(), key=lambda x: -x[1])
-    sum_so_far = 0
+	# Filter our investments and salary, as treating them separate
+	expenses = summary[~(summary.keys().str.startswith("salary") |
+					  summary.keys().str.startswith("invest"))]
 
-    for key, value in total_expense_arr:
-        if value == 0:
-            continue
+	print(expenses.to_string(dtype=False))
+	#for type_, value in expenses.items():
+	#	print(f"{type_}\t: {value}")
+	#	sum_so_far = round(sum_so_far + value, 2)
+	#	print("\t\t\t", sum_so_far)
 
-        if will_be_back.get(key, 0) > 0 or longterm.get(key, 0) > 0:
-            print(f"{key}: {value}\t( ", end="")
+	print("```")
 
-            if will_be_back.get(key, 0) > 0:
-                print(f"-{will_be_back[key]}", end="")
-
-            if will_be_back.get(key, 0) > 0 and longterm.get(key, 0) > 0:
-                print(" , ", end="")
-
-            if longterm.get(key, 0) > 0:
-                print(f"*{longterm[key] - will_be_back.get(key, 0)}", end="")
-
-            print(" )")
-        else:
-            print(f"{key}: {value}")
-
-        sum_so_far = round(sum_so_far + value - will_be_back.get(key, 0), 2)
-        print("\t", sum_so_far)
-
-    print("```")
-
+# vi: set noexpandtab:

@@ -20,6 +20,9 @@ def hdfc_cc_pdf_convert_to_ir(filepath):
 			df.columns = df.iloc[0]
 			df = df.iloc[1:, :-1]
 
+			# Ensure column names don't have whitespaces
+			df.columns = df.columns.str.strip()
+
 			# Ensure mandatory columns such as date/description and amount
 			# exist in the table, else it's probably some other table
 			# structure in the pdf
@@ -55,25 +58,33 @@ def hdfc_cc_pdf_convert_to_ir(filepath):
 	# Columns like 'Feature Reward' can have NaN on concat
 	merged_df = merged_df.fillna('')
 
-	print(merged_df)
+	# Intermediate Representation (IR) requires 'date' and 'text' columns
+	merged_df = merged_df.rename(columns={
+		"Date": "date",
+		"Transaction Description": "text",
 
-	trx_list = []
-	for _idx, row in merged_df.iterrows():
+		# Note: Points are currently in string format
+		"Feature Reward": "x-points"
+	})
+
+	# Add keys required by IR
+	merged_df["debit"] = 0.0
+	merged_df["credit"] = 0.0
+
+	for idx, row in merged_df.iterrows():
 		amount = row["Amount (in Rs.)"]
-		points = row["Feature Reward"]
 
 		# Remove commas from amount
 		amount = amount.replace(',', '')
 
-		trx_list.append({
-			"date": row["Date"],
-			"text": row["Transaction Description"],
-			"debit": float(amount) if not ("Cr" in amount) else 0,
-			"credit": float(amount.split()[0]) if ("Cr" in amount) else 0,
-			"x-points": int(points or 0)
-		})
+		if "Cr" in amount:
+			merged_df.loc[idx, "credit"] = float(amount.rstrip("Cr"))
+		else:
+			merged_df.loc[idx, "debit"] = float(amount)
 
-	return trx_list
+	merged_df = merged_df.drop("Amount (in Rs.)", axis=1)
+
+	return merged_df
 
 
 # convert CSV credit card statement from HDFC mobile app

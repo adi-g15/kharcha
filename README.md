@@ -64,6 +64,10 @@ Stage 1: Convert passed input into IR (Intermediate Representation)
                 credit: Number,
          }
 
+> Note: Even though 'type' is not mentioned here, but backends can have the
+> 'type' column, and these pre-assigned category/type will be considered as
+> is by the tool
+
 > Rest of the stages are now independent of whether it's an SBI/HDFC/ICICI
 statement etc.
 
