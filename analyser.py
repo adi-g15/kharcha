@@ -5,7 +5,6 @@ import pandas as pd
 
 # @note It doesn't take into account any complex handling, such as
 #	   it does NOT take into account the fact that it is "will_be_back"
-#	   it does NOT take into account the fact that it is "longterm"
 #
 #	   Do that yourself before passing the data array here
 def get_summary(data, field_name=None, reducer_fn=None):
@@ -29,9 +28,6 @@ def get_summary(data, field_name=None, reducer_fn=None):
 		obj[key] = reducer_fn(obj.get(key, 0), e)
 
 	return obj
-
-def get_salary(data):
-	return sum(e.get("credit", 0) for e in data if e.get("type") == "Salary")
 
 def get_kharcha_in_type(series, type_):
 	filtered_idxs = series.keys().str.startswith(type_)

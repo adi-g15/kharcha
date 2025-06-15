@@ -246,9 +246,6 @@ def assign_types(df, use_ai) -> pd.DataFrame:
 	if "type" not in df.columns:
 		df["type"] = ""
 
-	if "longterm" not in df.columns:
-		df["longterm"] = False
-
 	if "will_be_back" not in df.columns:
 		df["will_be_back"] = 0
 
@@ -293,10 +290,6 @@ def assign_types(df, use_ai) -> pd.DataFrame:
 		if not type_:
 			if ((debit == 0 and credit <= 50) or (debit <= 50 and credit == 0)):
 				type_ = "Misc"
-
-		# Mark longterm
-		if type_.startswith("Invest"):
-			df.loc[idx, "longterm"] = True
 
 		# Assign type
 		df.loc[idx, "type"] = type_
