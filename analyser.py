@@ -34,7 +34,13 @@ def get_kharcha_in_type(series, type_):
 	return series[filtered_idxs].sum()
 
 def kharcha_analysis(df, is_detailed):
-	print(df[df["type"].str.fullmatch('')])
+	uncategorised_data = df[df["type"].str.fullmatch('')]
+	if not uncategorised_data.empty:
+		print("Uncategorised Data:")
+		#uncategorised_data = uncategorised_data.sort_values(by="credit",
+		uncategorised_data = uncategorised_data.sort_values(by="debit",
+													  ascending=False)
+		print(uncategorised_data)
 
 	if not is_detailed:
 		# If user doesn't want detailed summary we don't need detailed
