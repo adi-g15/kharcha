@@ -13,10 +13,17 @@ from ai_ask import ask_bam
 
 # merchants table
 merchants = {
-	"WDL ATM CASH": "CashWithdrawal",
+	"WDL ATM CASH": "Cash",
+	"CASH": "Cash",
+
+	"CHQ": "BankCheck",
 
 	"DEPOSIT TRANSFER INT": "Invest/Interest",
 	"BULK POSTING ACHCr": "Invest/Dividend",
+	"BULK POSTING-ACHCr": "Invest/Dividend",
+
+	# Wierd, but want to offset tax refunds against random refunds
+	"TAX REFUND": "Invest/TaxRefund",
 
 	"DEBIT SWEEP": "Invest/MOD",
 	"SWEEP FROM": "Invest/MOD",
@@ -25,9 +32,14 @@ merchants = {
 
 	"TO TRANSFER UPI": "BankTransfers",
 
+	"Rent": "Rent",
+
 	"SPLITWISE": "Splitwise",
 	"BY TRANSFER UPI": "Splitwise/Returned",	# Assuming all inward UPI transactions are splitwise clearing
-	"BY TRANSFER NEFT": "Invest/Redeemed",		# Assuming all inward NEFT is redeemed mutual funds
+	#"BY TRANSFER NEFT": "Invest/Redeemed",		# Assuming all inward NEFT is redeemed mutual funds
+	"INVESCO MF": "Invest/Redeemed",
+	"ICICI PRUDENTIAL": "Invest/Redeemed",
+	"Indian Clearin": "Invest/SIP",
 
 	"ACH DEBIT RETURN CHARGES": "Penalty",
 	"ACH C-": "Dividend_n_Interest",		# Maybe
@@ -73,6 +85,7 @@ merchants = {
 	"ICECREAM": "Food/Outside",
 	"UPI-CHULHA CHAUKI DA DHABA": "Food/Outside",
 	"HungerBox": "Food/Riviera",
+	"Hunger Box": "Food/Riviera",
 	"Eat Good Technologies": "Food/Riviera",
 	"AMLA JUICE": "Food/Supplements",
 	"MEDICINE": "Medical/Medicines",
@@ -85,7 +98,7 @@ merchants = {
 	"ADYAR ANANDA BHAVAN SWEET": "Food/Sweets",
 	"Mujeeb A K": "Food/Kirana",
 
-	"BECHU SAH/SBIN/9795": "Home",
+	"BECHU ": "Home",
 
 	"for TDR": "Invest/FD",
 	"ICIC/bsestarmfr": "Invest/MF",
@@ -93,8 +106,10 @@ merchants = {
 	"Nextbill/HDFC/groww.razo/Pay": "Invest/Groww",
 	"Nextbill/ICIC/groww.razo/Pay": "Invest/Groww",
 	"NEXTBILLION TECH": "Invest/Groww",
-	"Indian Clearin": "Invest/Groww",
+	"NEXTBILLIONTECHNOLOG": "Invest/Groww",
 	"GROWW INVEST": "Invest/Groww",
+	"GROWW IN": "Invest/Groww",
+	"Zerod ha": "Invest/Zerodha",
 	"RDInstallment": "Invest/RD",
 	"RD INSTALLMENT": "Invest/RD",
 	"WITHDRAWAL TRANSFER": "Invest/RD",
@@ -108,7 +123,10 @@ merchants = {
 	"TOP UP": "Misc",
 
 	"IBM INDIA PRIVAT": "Salary",
-	"ADITYA  GUPTA-AG": "Salary/SelfTransfer",
+	"ADITYA  GUPTA": "Self",
+	"ADITYA G": "Self",
+	"ADITYAGUPTA": "Self",
+	"To self": "Self",
 
 	"DECATHLO/HDFC/decathlon": "Shopping/Decathlon",
 	"SHOE SHOP": "Shopping/Shoe",

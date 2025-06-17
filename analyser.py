@@ -57,8 +57,8 @@ def kharcha_analysis(df, is_detailed):
 
 		summary[type_] = summary.get(type_, 0) + val
 
-	investments = get_kharcha_in_type(summary, "Invest")
-	salary		= get_kharcha_in_type(summary, "Salary")
+	investments = round(get_kharcha_in_type(summary, "Invest"), 2)
+	salary		= round(get_kharcha_in_type(summary, "Salary"), 2)
 
 	summary.to_json(path_or_buf="/tmp/json")
 	total_out = round(summary.sum() - investments - salary, 2)
@@ -77,6 +77,9 @@ def kharcha_analysis(df, is_detailed):
 	expenses = summary[~(summary.keys().str.startswith("Salary") |
 					  summary.keys().str.startswith("Invest"))]
 	expenses = expenses.sort_values(ascending=False)
+
+	# Filter out entries which are zero
+	expenses = expenses[expenses != 0]
 
 	assert(round(expenses.sum(),2) == total_out)
 
