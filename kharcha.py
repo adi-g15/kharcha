@@ -30,6 +30,10 @@ parser.add_argument("--amazon",
 parser.add_argument("--json",
                     action="extend", nargs="+", type=str,
                     help="Provide a JSON file for analysis, should be in IR form")
+parser.add_argument("--labelled-json",
+                   action="extend", nargs="+", type=str,
+                   help=("List of already-labelled transactions, to be"
+                   " used to categorise data given with other options."))
 parser.add_argument("--use-ai",
                     action="store_true",
                     help="Use AI to label the data (default: off)")
@@ -67,7 +71,10 @@ use_ai = args.use_ai
 #    }
 #
 
-global_df = pd.DataFrame(columns=['date', 'text', 'amount'])
+global_df = pd.DataFrame(columns=['date', 'text', 'debit', 'credit'])
+type_hints_df = pd.DataFrame(columns=['date', 'text', 'debit', 'credit',
+                                      'type', 'will_be_back'])
+
 if args.json:
     for filepath in args.json:
         output = pd.read_json(path_or_buf=filepath, convert_dates=False)
@@ -92,18 +99,44 @@ if args.hdfc_cc:
         global_df = pd.concat([global_df, output], axis=0, ignore_index=True)
         validate_ir(global_df)
 
-# Drop some invalid columns
-if "" in global_df.columns:
-	global_df = global_df.drop("", axis=1)
+if args.labelled_json:
+    for filepath in args.labelled_json:
+        output = pd.read_json(path_or_buf=filepath, convert_dates=False)
 
-if "null" in global_df.columns:
-	global_df = global_df.drop("null", axis=1)
+        # 'type' field is required, else we just skip the dataframe
+        if "type" not in output.columns:
+            continue
+
+        # Only use indices where 'type' or 'will_be_back' is assigned
+        indices = (output["type"] != '') | (output["will_be_back"] != 0)
+        output = output.loc[indices]
+
+        # Drop columns that we don't expect in IR
+        # TODO: mention 'will_be_back' in IR
+        output = output[["date","text","debit","credit","type","will_be_back"]]
+
+        # Drop duplicates
+        output = output.drop_duplicates()
+
+        type_hints_df = pd.concat([type_hints_df, output], axis=0,
+                                  ignore_index=False)
+
+# Drop some invalid columns
+if None in global_df.columns:
+    global_df = global_df.drop(columns=[None])
+
+if "" in global_df.columns:
+    global_df = global_df.drop("", axis=1)
+
+# Clean dataframes, strip all strings
+global_df = global_df.map(lambda x: x.strip() if isinstance(x, str) else x)
+type_hints_df = type_hints_df.map(lambda x: x.strip() if isinstance(x, str) else x)
 
 stage1_output = global_df
 
 # STAGE 2 - Assign Types
 stage2_input = stage1_output
-stage2_output = assign_types(stage2_input, use_ai)
+stage2_output = assign_types(stage2_input, use_ai, hints=type_hints_df)
 
 if stage2_output is None:
     print("Stage 1 can't give an output: Backend did not give valid IR")

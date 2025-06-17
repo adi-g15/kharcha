@@ -34,6 +34,13 @@ merchants = {
 
 	"Rent": "Rent",
 
+	"Aman kumar": "Aman",   # TODO: Remove this, temporary only
+	"Abhay Kumar": "Abhay",   # TODO: Remove this, temporary only
+	# TODO: Self should be zero
+	# TODO: Bills should be almost zero
+	# TODO: Aman should be almost zero
+	# TODO: Abhay should be almost zero
+
 	"SPLITWISE": "Splitwise",
 	"BY TRANSFER UPI": "Splitwise/Returned",	# Assuming all inward UPI transactions are splitwise clearing
 	#"BY TRANSFER NEFT": "Invest/Redeemed",		# Assuming all inward NEFT is redeemed mutual funds
@@ -247,7 +254,7 @@ async def assign_types_with_ai(untagged_records):
 			except Exception as e:
 				print(f"Warning: Could not parse AI response record: {record_str}", file=sys.stderr)
 
-def assign_types(df, use_ai) -> pd.DataFrame:
+def assign_types(df: pd.DataFrame, use_ai: bool, hints: pd.DataFrame) -> pd.DataFrame:
 	# Ensure the dataframe has all columns mandated by IR
 	if "date" not in df.columns:
 		return None
@@ -299,6 +306,53 @@ def assign_types(df, use_ai) -> pd.DataFrame:
 			.str.replace(r'\s+', '_', regex=True)
 	)
 
+	# Phase 0: Some entries will already have type label
+	pass
+
+
+	# Phase 1: Use hints if available to assign type labels
+	if not hints.empty:
+		assert(hints.columns.size == 6)
+		assert((hints.columns == ["date", "text", "debit", "credit",
+								"type", "will_be_back"]).all())
+
+		# Remove duplication
+		hints = hints.drop_duplicates(subset=["date", "text", "debit", "credit"])
+
+		# Left outer join
+		labelled_df = df.merge(
+				hints,
+				on=["date", "text", "debit", "credit"],
+				how='left',
+				suffixes=('','_fromhint')
+			)
+
+		# Ensure we don't replace '' with NaNs
+		labelled_df["type_fromhint"] = labelled_df["type_fromhint"].fillna('')
+
+		# Don't overwrite existing labels, only update empty labels
+		labelled_df["type"] = labelled_df["type"].mask(
+				cond=labelled_df["type"].str.strip() == '',
+				other=labelled_df["type_fromhint"])
+
+		labelled_df = labelled_df.drop(columns="type_fromhint")
+
+		# If 'will_be_back_fromhint' exists, means 'will_be_back' is
+		# available in both df and labelled_df, merge them
+		if "will_be_back_fromhint" in labelled_df.columns:
+			# Ensure no NaNs
+			labelled_df["will_be_back_fromhint"] = (
+					labelled_df["will_be_back_fromhint"].fillna(0))
+
+			labelled_df["will_be_back"] = labelled_df["will_be_back"].mask(
+					cond=labelled_df["will_be_back"].fillna(0) == 0,
+					other=labelled_df["will_be_back_fromhint"])
+
+			labelled_df = labelled_df.drop(columns="will_be_back_fromhint")
+
+		assert((df.columns == labelled_df.columns).all())
+		df = labelled_df
+
 	# Lower-case version of merchants for case-insensitive matching
 	updated_merchants = {key.lower(): value for key, value in merchants.items()}
 
@@ -315,7 +369,6 @@ def assign_types(df, use_ai) -> pd.DataFrame:
 		credit = row["credit"]
 		type_  = row["type"] or ''
 
-		# First try to match with merchants
 		if not type_:
 			text_lower = text.lower()
 			for key, value in updated_merchants.items():
@@ -326,7 +379,7 @@ def assign_types(df, use_ai) -> pd.DataFrame:
 					# higher priority type at end
 					# break
 
-		# If type still not assigned, just ignore small values
+		# Phase 3: If type still not assigned, just ignore small values
 		if not type_:
 			if ((debit == 0 and credit <= 50) or (debit <= 50 and credit == 0)):
 				type_ = "Misc"
