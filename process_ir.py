@@ -254,6 +254,26 @@ async def assign_types_with_ai(untagged_records):
 			except Exception as e:
 				print(f"Warning: Could not parse AI response record: {record_str}", file=sys.stderr)
 
+# Either returns the type or empty string '', if type not found
+def _get_transaction_type(merchant_list, trx_text) -> str:
+	text_lower = trx_text.lower()
+	type_ = ''
+
+	for key, value in merchant_list.items():
+		if key in text_lower:
+			type_ = value
+			# TODO: this break causes behaviour to change, it
+			# shouldn't happen that same transaction is chosing a
+			# higher priority type at end
+			# break
+	
+	return type_
+
+# Returns True or False, based on whether a given debit/credit amount is
+# Misc transaction
+def _is_misc_transaction(debit: float, credit: float) -> bool:
+	return ((debit == 0 and credit <= 50) or (debit <= 50 and credit == 0))
+
 def assign_types(df: pd.DataFrame, use_ai: bool, hints: pd.DataFrame) -> pd.DataFrame:
 	# Ensure the dataframe has all columns mandated by IR
 	if "date" not in df.columns:
@@ -356,38 +376,27 @@ def assign_types(df: pd.DataFrame, use_ai: bool, hints: pd.DataFrame) -> pd.Data
 	# Lower-case version of merchants for case-insensitive matching
 	updated_merchants = {key.lower(): value for key, value in merchants.items()}
 
-	# Process each entry
-	for idx, row in df.iterrows():
-		df.loc[idx, "debit"]  = row["debit"] or 0.0
-		df.loc[idx, "credit"] = row["credit"] or 0.0
+	# Phase 2: Tag untagged-transactions based on merchant list
+	df["type"] = df["type"].fillna('')
+	df["type"] = df.apply(axis='columns', func=lambda row,
+					   merchants=updated_merchants:
+						row["type"] or
+						_get_transaction_type(merchants, row["text"])
+						or ''
+					)
 
-		# Ensure we are using the updated row
-		row = df.loc[idx]
+	# Phase 3: If still some transactions are untagged, tag them as
+	# Miscelleneous
+	uncategorised_mask = df["type"].isnull() | (df["type"] == '')
+	uncategorised_mask = uncategorised_mask & df.apply(
+				lambda row: _is_misc_transaction(
+								row["debit"],
+								row["credit"]),
+				axis='columns')
 
-		text   = row["text"]
-		debit  = row["debit"]
-		credit = row["credit"]
-		type_  = row["type"] or ''
+	df.loc[uncategorised_mask, "type"] = "Misc"
 
-		if not type_:
-			text_lower = text.lower()
-			for key, value in updated_merchants.items():
-				if key in text_lower:
-					type_ = value
-					# TODO: this break causes behaviour to change, it
-					# shouldn't happen that same transaction is chosing a
-					# higher priority type at end
-					# break
-
-		# Phase 3: If type still not assigned, just ignore small values
-		if not type_:
-			if ((debit == 0 and credit <= 50) or (debit <= 50 and credit == 0)):
-				type_ = "Misc"
-
-		# Assign type
-		df.loc[idx, "type"] = type_
-
-	# AI tagging (optional)
+	# Phase 4: AI tagging (optional)
 	if use_ai:
 		print("AI tagging has been disabled now. As BAM AI has been sunset.")
 
