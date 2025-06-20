@@ -12,7 +12,7 @@ import pandas as pd
 from ai_ask import ask_bam
 
 # merchants table
-merchants = {
+MERCHANTS = {
 	"WDL ATM CASH": "Cash",
 	"CASH": "Cash",
 
@@ -262,11 +262,8 @@ def _get_transaction_type(merchant_list, trx_text) -> str:
 	for key, value in merchant_list.items():
 		if key in text_lower:
 			type_ = value
-			# TODO: this break causes behaviour to change, it
-			# shouldn't happen that same transaction is chosing a
-			# higher priority type at end
-			# break
-	
+			# TODO: currently it choses the 'last matched substring'
+
 	return type_
 
 # Returns True or False, based on whether a given debit/credit amount is
@@ -373,28 +370,24 @@ def assign_types(df: pd.DataFrame, use_ai: bool, hints: pd.DataFrame) -> pd.Data
 		assert((df.columns == labelled_df.columns).all())
 		df = labelled_df
 
-	# Lower-case version of merchants for case-insensitive matching
-	updated_merchants = {key.lower(): value for key, value in merchants.items()}
-
 	# Phase 2: Tag untagged-transactions based on merchant list
-	df["type"] = df["type"].fillna('')
-	df["type"] = df.apply(axis='columns', func=lambda row,
-					   merchants=updated_merchants:
-						row["type"] or
-						_get_transaction_type(merchants, row["text"])
-						or ''
-					)
+	# Lower-case version of merchants for case-insensitive matching
+	merchants = {key.lower(): value for key, value in MERCHANTS.items()}
+	mask = df["type"].isnull() | (df["type"] == '')
+	df.loc[mask, "type"] = df.loc[mask, "text"].apply(
+				lambda text, merchants=merchants:
+					_get_transaction_type(merchants, text))
 
 	# Phase 3: If still some transactions are untagged, tag them as
 	# Miscelleneous
-	uncategorised_mask = df["type"].isnull() | (df["type"] == '')
-	uncategorised_mask = uncategorised_mask & df.apply(
+	mask = df["type"].isnull() | (df["type"] == '')
+	mask = mask & df.apply(
 				lambda row: _is_misc_transaction(
 								row["debit"],
 								row["credit"]),
 				axis='columns')
 
-	df.loc[uncategorised_mask, "type"] = "Misc"
+	df.loc[mask, "type"] = "Misc"
 
 	# Phase 4: AI tagging (optional)
 	if use_ai:
