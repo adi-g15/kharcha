@@ -9,7 +9,7 @@ import tempfile
 import shutil
 import pandas as pd
 
-from ai_ask import ask_bam
+from ml_tagging import tag_data_using_ml
 
 # merchants table
 MERCHANTS = {
@@ -391,7 +391,7 @@ def assign_types(df: pd.DataFrame, use_ai: bool, hints: pd.DataFrame) -> pd.Data
 
 	# Phase 4: AI tagging (optional)
 	if use_ai:
-		print("AI tagging has been disabled now. As BAM AI has been sunset.")
+		df = tag_data_using_ml(df)
 
 	return df
 

@@ -48,7 +48,8 @@ def kharcha_analysis(df, is_detailed):
 		#
 		# Create a copy to ensure we don't modify original DataFrame
 		df = df.copy()
-		df["type"] = df["type"].str.split('/').str.get(0)
+		df["type"] = df["type"].apply(lambda t: "/".join(t.split('/')[:2]) if
+								t.startswith("AI") else t.split('/')[0])
 
 	summary = pd.Series(dtype='float')
 	for _, row in df.iterrows():
