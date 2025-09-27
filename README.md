@@ -13,8 +13,12 @@ As of now, the tool has following backends:
 * Amazon Pay Statement: Need to run a script in browser to extract data, as Amazon doesn't support exporting it
 * Generic JSON format: must follow the mentioned IR below, it's easy
 
-> Experimental: Using IBM BAM AI models to categorise the transactions
-> (https://bam.res.ibm.com/)
+Basic transaction categorisation is simply substring matching of
+transaction text/description.
+
+We have two ML/AI options also for categorisation:
+* ML: RandomForestClassifier used to classify transactions (not good yet)
+* AI: Asks IBM BAM, and uses LLAMA 2 LLM model, to categorise the transaction (deprecated)
 
 ![Design diagram of kharcha](./assets/kharcha-script.drawio.svg)
 
@@ -31,7 +35,7 @@ Read more in [Design section](#design).
 4. Go to bottom of the statement's page, 'Select Format' as 'Delimited',
    then 'Download'
 
-Now run `./kharcha.js --hdfc FILENAME` (where FILENAME is the path to the
+Now run `./kharcha.py --hdfc FILENAME` (where FILENAME is the path to the
 downloaded file)
 
 ### SBI Bank Statements
@@ -39,7 +43,7 @@ downloaded file)
 1. Login at https://retail.onlinesbi.sbi/retail/login.htm
 2. Go to bank statement page, download the statement in PDF format
 
-Now run `./kharcha.js --sbi THE_PDF`
+Now run `./kharcha.py --sbi THE_PDF`
 
 ## Design
 
