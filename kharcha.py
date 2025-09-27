@@ -128,6 +128,11 @@ if None in global_df.columns:
 if "" in global_df.columns:
     global_df = global_df.drop("", axis=1)
 
+# Clean transaction texts, some transactions, like EMI on hdfc cards has an
+# UTF-8 replace character: �
+# Remove it, so that transaction names can be matched to type correctly
+global_df["text"] = global_df["text"].map(lambda s: s.replace('�',''))
+
 # Clean dataframes, strip all strings
 global_df = global_df.map(lambda x: x.strip() if isinstance(x, str) else x)
 type_hints_df = type_hints_df.map(lambda x: x.strip() if isinstance(x, str) else x)

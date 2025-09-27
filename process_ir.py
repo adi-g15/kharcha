@@ -9,7 +9,7 @@ import tempfile
 import shutil
 import pandas as pd
 
-from ml_tagging import tag_data_using_ml
+from ml_tagging import tagDataUsingML
 
 # merchants table
 MERCHANTS = {
@@ -66,6 +66,7 @@ MERCHANTS = {
 	"SASTA MA/HDFC": "Food/Fruits",
 	"SIVANANT": "Food/Fruits",
 	"PUSHPA SIVANANT": "Food/Fruits",
+	"VENKATESHWARA VEGETAB": "Food/Fruits",
 	"SRI GANE/PYTM": "Food/Juice",
 	"SRI GANESH FRUIT JUI": "Food/Juice",
 	"NANDINI-PAYTMQR": "Food/Milk",
@@ -78,6 +79,8 @@ MERCHANTS = {
 	"MITHAI": "Food/Outside",
 	"Daalchini/PYTM": "Food/Riviera",
 	"UPI-DRAGON HOUSE": "Food/Pyramid",
+	"SHENZHEN KITCHEN": "Food/Pyramid",
+	"COOKIEMAN": "Food/Pyramid",
 	"KRISHNA SAGAR": "Food/Outside",
 	"Mr SAGAR/PYTM": "Food/Outside",
 	"RAJU KUM/YESB": "Food/Outside",
@@ -86,11 +89,20 @@ MERCHANTS = {
 	"LUNCH": "Food/Outside",
 	"IDLI": "Food/Outside",
 	"MOMOS": "Food/Outside",
+	"BABAI HOTEL": "Food/Outside",
+	"TRUFFLES HOSPITALITY": "Food/Outside",
+	"PUNJAB DA DHABA": "Food/Outside",
+	"Burger King": "Food/Outside",
+	"AROGYA AHAARA": "Food/Outside",
+	"RR Stall": "Food/RailwayStall",
 	"THAR THE TASTE OF": "Food/Outside",
 	"UPI-BANGALORE FOOD": "Food/Outside",
 	"UPI-RESTAURANT BRANDS ": "Food/Outside",
 	"ICECREAM": "Food/Outside",
 	"UPI-CHULHA CHAUKI DA DHABA": "Food/Outside",
+	"MEGHANA FOODS": "Food/Outside",
+	"CALIFORNIA BURRITO": "Food/Pyramid",
+	"Restaurant": "Food/Outside",
 	"HungerBox": "Food/Riviera",
 	"Hunger Box": "Food/Riviera",
 	"Eat Good Technologies": "Food/Riviera",
@@ -104,6 +116,7 @@ MERCHANTS = {
 	"INDIA SWEET HOUSE": "Food/Sweets",
 	"ADYAR ANANDA BHAVAN SWEET": "Food/Sweets",
 	"Mujeeb A K": "Food/Kirana",
+	"Mujeeb AK": "Food/Kirana",
 
 	"BECHU ": "Home",
 
@@ -122,12 +135,18 @@ MERCHANTS = {
 	"WITHDRAWAL TRANSFER": "Invest/RD",
 	"Insurance premium": "Insurance",
 	"POLICY BAZAAR": "Insurance",
+	"MAXLIFE MUMBAI": "Insurance",
+	"Policybazaar Insurance": "Insurance",
 
 	"G GOPALA/PYTM/pay": "Grooming/Haircut",
+	"Mr SHAKTHIVEL": "Grooming/Haircut",
 	"SOAP": "Grooming/Things",
 
 	"CAKE": "Misc",
 	"TOP UP": "Misc",
+	"MR DIY": "Misc/Tools",
+
+	"VINAYAK YAMAHA": "Repair/Bike",
 
 	"IBM INDIA PRIVAT": "Salary",
 	"ADITYA  GUPTA": "Self",
@@ -155,6 +174,7 @@ MERCHANTS = {
 
 	"Google P": "Subscription/GoogleOne",
 	"NETFLIX": "Subscription/Netflix",
+	"GOOGLEPLAY MUMBAI": "Subscription/GooglePlay",
 
 	"Bangalor/INDB": "Travel/Metro",
 	"BMTC BUS": "Travel/Bus",
@@ -168,6 +188,8 @@ MERCHANTS = {
 	"UBER": "Travel/Cab",
 	"CAB": "Travel/Cab",
 	"AUTO": "Travel/Auto",
+	"GOIBIBO FLIGHT": "Travel/Flight",
+	"Cleartrip": "Travel/ClearTrip",
 
 	"Gift Cards": "GiftCard",
 	"Added Amazon Pay balance": "GiftCard",
@@ -178,6 +200,10 @@ MERCHANTS = {
 	"Paid on Amazon": "Orders/Amazon",
 	"AmazonPay": "Orders/Amazon",
 	"Flipkart Internet": "Orders/Flipkart",
+	"FLIPKART PAYMENTS BANGALORE": "EMI/Flipkart",
+	"AGGREGATOREMI-OFFUSCREDIT": "EMI/Flipkart",
+	"OFFUS EMI": "EMI/Flipkart",
+	"IGST-VPS": "EMI/Flipkart",
 	"Meesho": "Orders/Meesho",
 
 	"JIOIN APP DIRECT": "Recharge/Mobile",
@@ -190,6 +216,14 @@ MERCHANTS = {
 	"NEUROGLIA HEALTH PR": "Education/Course",
 
 	"CLOTHIN": "Shopping/Clothing",
+	"POWERLOOK MUMBAI": "Shopping/Clothing",
+	"WESTSIDE": "Shopping/Clothing",
+	"ADITYA BIRLA FASHION": "Shopping/Clothing",
+	"UPI-SNITCH": "Shopping/Clothing",
+
+	"Airbnb": "Hotel/Airbnb",
+
+	"PAY*IGP COM": "Gift/IGP",
 }
 
 # Assign 'type' label using AI. Will NOT overwrite 'type' labels if
@@ -391,7 +425,7 @@ def assign_types(df: pd.DataFrame, use_ai: bool, hints: pd.DataFrame) -> pd.Data
 
 	# Phase 4: AI tagging (optional)
 	if use_ai:
-		df = tag_data_using_ml(df)
+		df = tagDataUsingML(df)
 
 	return df
 
